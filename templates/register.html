@@ -1,0 +1,253 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<head>
+    <title>Register | Rarbin</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/legacy/index.css">
+    <link rel="stylesheet" href="/static/files/dropdown.css">
+    <link rel="stylesheet" href="/static/files/bootstrap.min.js">
+    <link rel="stylesheet" href="/static/files/doxbin.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <link rel="canonical" href="https://rarbin.com/register"/>
+</head>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="robots" content="noindex">
+	<style>
+    .register-div{
+        margin: 0 auto;
+        max-width: 500px;
+        min-width: 100px;
+        width: 100%;
+        text-align: left;
+    }
+    .register-div label{
+        padding: 10px 0px 1px 3px;
+        margin: 0;
+    }
+	input{
+		line-height: 1.2;
+		color: white;
+		background: #282828;
+		border: 0;
+		border-radius: 2px;
+		display: inline-block;
+		-webkit-font-smoothing: antialiased;
+		outline: none;
+		padding: 7px 5px;
+        width: 100%;
+	}
+	input::placeholder{
+		color: rgb(167, 167, 167);
+	}
+	input[type=submit]{
+		line-height: 1.2;
+		color: white;
+		background: #282828;
+		border: 0;
+		border-radius: 2px;
+		display: block;
+		-webkit-font-smoothing: antialiased;
+		outline: none;
+		padding: 7px 5px;
+        width: 90%;
+        margin: 15px auto 50px auto;
+	}
+	input{
+		font-size: 100%;
+	}
+	
+	input[type=submit]:hover{
+		color: white;
+		background: #3d3d3d;
+		text-decoration: none;
+	}
+	.center {
+	  text-align: center;
+	}
+    .wcon{
+        background-color: #1f1f1f;
+        width: 100%;
+        border-radius: 5px;
+        margin: 0 0 20px;
+        box-shadow: 0 1px 3px #0a0b0d;
+        padding: 10px 20px;
+        position: relative;
+        display: inline-block;
+        -webkit-box-shadow: inset 0px 0px 3px 0px rgba(0,0,0,0.75);
+        -moz-box-shadow: inset 0px 0px 3px 0px rgba(0,0,0,0.75);
+        box-shadow: inset 0px 0px 3px 0px rgba(0,0,0,0.75);
+        text-align: right;
+    }
+    .wcon p{
+        margin-bottom: 3px;
+    }
+    .recaptcha-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 20px 0;
+    }
+
+	</style>
+</head>
+
+<body>
+    {% endblock %}
+
+    {% block bottom %}
+    <div class="container" style="background-color: #111111; min-height: 100vh;-webkit-box-shadow: 0px 0px 7px 0px rgba(31,31,31,1);-moz-box-shadow: 0px 0px 7px 0px rgba(31,31,31,1);box-shadow: 0px 0px 7px 0px rgba(31,31,31,1);">
+        <div class="col-md-12" style="margin-top: 10px;">
+            <div class="col-md-12" style="margin-top: 80px;">
+                <div align="center">
+                    <h5 style="font-size: 25px;">Create Account</h5>
+                    {% if error %} 
+                    <p class="error" style="color: red; padding: 0px 0px 10px 0px; text-align: center; margin: 0;">{{ error }}</p> 
+                    {% endif %} 
+                    <noscript><p style="color: red; padding: 0px 0px 10px 0px; text-align: center; margin: 0;">Rarbin requires JavaScript to function correctly.</noscript>
+                </div>
+            </div>
+            <div class="col-md-6 col-md-offset-3 text-center">
+                <div class="register-div">
+                    <div id="error-msg" style="color: red; padding: 10px 0px 0px 0px; text-align: center; margin: 0;"></div>
+                    <form action="" method="POST" id="register-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <label for="username">Username</label><br>
+                        <input name="username" id="username" type="text" placeholder="Username" minlength="2" maxlength="16" pattern="[A-Za-z0-9]+" title="Only letters and numbers are allowed" required autocomplete="off"><br>
+                        <label for="email">Email</label><br>
+                        <input name="email" id="email" type="email" placeholder="Email (not required)" autocomplete="off"><br>
+                        <label for="password">Password</label><br>
+                        <input name="password" id="password" type="password" placeholder="Password" autocomplete="off"><br>
+                        <label for="confpass">Confirm Password</label><br>
+                        <input name="confpass" id="confpass" type="password" placeholder="Confirm Password" autocomplete="off"><br><br>
+                        
+                        <div class="recaptcha-container">
+                            <div class="g-recaptcha" data-theme="dark" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
+                        </div><br>
+            
+                        <input type="submit" value="Register">
+                    </form>
+                </div>
+            </div>            
+        </div>
+    </div>
+    
+    <script>
+        function generateDeviceFingerprint() {
+            var fingerprint = {};
+            
+            fingerprint.screen_width = screen.width;
+            fingerprint.screen_height = screen.height;
+            fingerprint.screen_depth = screen.colorDepth;
+            fingerprint.screen_avail_width = screen.availWidth;
+            fingerprint.screen_avail_height = screen.availHeight;
+            
+            fingerprint.user_agent = navigator.userAgent;
+            fingerprint.language = navigator.language;
+            fingerprint.languages = navigator.languages ? navigator.languages.join(',') : '';
+            fingerprint.platform = navigator.platform;
+            fingerprint.cookie_enabled = navigator.cookieEnabled;
+            fingerprint.do_not_track = navigator.doNotTrack;
+            fingerprint.hardware_concurrency = navigator.hardwareConcurrency;
+            fingerprint.max_touch_points = navigator.maxTouchPoints;
+            
+            fingerprint.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            fingerprint.date_offset = new Date().getTimezoneOffset();
+            
+            try {
+                var canvas = document.createElement('canvas');
+                var ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillText('Device fingerprinting test', 2, 2);
+                fingerprint.canvas_hash = canvas.toDataURL();
+            } catch (e) {
+                fingerprint.canvas_hash = 'error';
+            }
+
+            try {
+                var canvas = document.createElement('canvas');
+                var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (gl) {
+                    var debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                    if (debugInfo) {
+                        fingerprint.webgl_vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+                        fingerprint.webgl_renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                    }
+                    fingerprint.webgl_version = gl.getParameter(gl.VERSION);
+                }
+            } catch (e) {
+                fingerprint.webgl_vendor = 'error';
+                fingerprint.webgl_renderer = 'error';
+                fingerprint.webgl_version = 'error';
+            }
+            
+            try {
+                var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                fingerprint.audio_sample_rate = audioContext.sampleRate;
+                fingerprint.audio_channel_count = audioContext.destination.channelCount;
+            } catch (e) {
+                fingerprint.audio_sample_rate = 'error';
+                fingerprint.audio_channel_count = 'error';
+            }
+            
+            var fonts = ['Arial', 'Verdana', 'Times New Roman', 'Courier New', 'Georgia', 'Palatino', 'Garamond', 'Bookman', 'Comic Sans MS', 'Trebuchet MS', 'Arial Black', 'Impact'];
+            var fontTestString = 'mmmmmmmmmmlli';
+            var fontTestSize = '72px';
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+            var defaultWidth = {};
+            var defaultHeight = {};
+            
+            for (var i = 0; i < fonts.length; i++) {
+                var font = fonts[i];
+                ctx.font = fontTestSize + ' ' + font;
+                defaultWidth[font] = ctx.measureText(fontTestString).width;
+                defaultHeight[font] = ctx.measureText(fontTestString).height;
+            }
+            fingerprint.fonts = defaultWidth;
+            
+            var fingerprintInput = document.createElement('input');
+            fingerprintInput.type = 'hidden';
+            fingerprintInput.name = 'device_fingerprint';
+            fingerprintInput.value = JSON.stringify(fingerprint);
+            document.getElementById('register-form').appendChild(fingerprintInput);
+            
+            return fingerprint;
+        }
+        
+        document.addEventListener('DOMContentLoaded', function () {
+            var usernameInput = document.getElementById('username');
+            
+            generateDeviceFingerprint();
+            
+            usernameInput.addEventListener('input', function () {
+                var value = usernameInput.value;
+                usernameInput.value = value.replace(/[^a-zA-Z0-9]/g, '');
+            });
+
+            document.getElementById('register-form').addEventListener('submit', function(event) {
+                if (usernameInput.value.length < 2) {
+                    event.preventDefault();
+                    var errorElement = document.querySelector('.error');
+                    if (!errorElement) {
+                        errorElement = document.createElement('p');
+                        errorElement.className = 'error';
+                        errorElement.style.color = 'red';
+                        errorElement.style.padding = '0px 0px 10px 0px';
+                        errorElement.style.textAlign = 'center';
+                        errorElement.style.margin = '0';
+                        this.parentNode.insertBefore(errorElement, this);
+                    }
+                    errorElement.textContent = 'Username must be at least 2 characters long.';
+                }
+            });
+        });
+    </script>
+{% endblock %}

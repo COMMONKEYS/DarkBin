@@ -1,0 +1,682 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users | Rarbin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='legacy/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='legacy/dropdown.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='files/doxbin.css') }}">
+    <link rel="canonical" href="https://rarbin.com/users"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        html {
+            overflow-x: hidden;
+        }
+        input[type=text],
+        select,
+        option {
+            line-height: 1.2;
+            color: white;
+            background: #282828;
+            border: 0;
+            border-radius: 2px;
+            display: inline-block;
+            -webkit-font-smoothing: antialiased;
+            outline: none;
+            padding: 7px 5px;
+            width: 200px;
+        }
+        input[type=text]::placeholder {
+            color: rgb(167, 167, 167);
+        }
+        input[type=submit] {
+            line-height: 1.2;
+            color: white;
+            background: #282828;
+            border: 0;
+            border-radius: 2px;
+            display: inline-block;
+            -webkit-font-smoothing: antialiased;
+            outline: none;
+            padding: 7px 5px;
+        }
+        input,
+        select,
+        option {
+            font-size: 100%;
+        }
+        input[type=submit]:hover {
+            color: white;
+            text-decoration: none;
+        }
+        .center {
+            text-align: center;
+        }
+        .admin-text {
+            color: red;
+            font-weight: bold;
+        }
+        .doxbin-text {
+            text-align: center;
+            background-color: inherit;
+            line-height: 15px;
+            border: none;
+            color: rgb(255, 0, 0);
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+        .hoa-title {
+            margin: 5px 0 0 0;
+            letter-spacing: 2px;
+        }
+        .hoa-container {
+            border: solid 1px rgb(40, 40, 40);
+            background-color: rgb(14, 14, 14);
+            width: 32%;
+            border-radius: 2px;
+            float: left;
+            margin: 10px 5px 10px 5px;
+            position: relative;
+            padding: 15px;
+            -webkit-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+            -moz-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+            box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+            height: 460px;
+        }
+        .hoa-container:hover {
+            border: solid 1px rgb(44, 44, 44);
+            background-color: rgb(18, 18, 18);
+        }
+        .hoa-container .hoa-image {
+            text-align: center;
+            max-height: 215px;
+            border-bottom: solid 1px rgb(40, 40, 40);
+        }
+        .hoa-container .hoa-image img {
+            width: 100%;
+            height: 200px;
+            max-width: 200px;
+            max-height: 200px;
+            margin-bottom: 15px;
+        }
+        .hoa-container .hoa-name {
+            padding-top: 10px;
+            text-align: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .hoa-container .hoa-description {
+            margin-top: 5px;
+            text-align: center;
+            color: rgb(200, 200, 200);
+            word-wrap: break-word;
+            overflow-y: auto;
+            height: 160px;
+        }
+        @media only screen and (max-width: 991px) {
+            .hoa-container {
+                width: 48%;
+            }
+        }
+        @media only screen and (max-width: 575px) {
+            .hoa-container {
+                width: 100%;
+            }
+        }
+        @media only screen and (max-width: 271px) {
+            .doxbin-text {
+                font-size: 9px;
+                line-height: 10px;
+            }
+            .hoa-title {
+                font-size: 16px;
+                letter-spacing: 2px;
+            }
+        }
+        ::-webkit-scrollbar {
+            width: 7px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #cacaca;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgb(110, 110, 110);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgb(68, 68, 68);
+        }
+        .rainbow {
+            text-shadow: 2px 2px 4px #000000;
+            -webkit-animation: rainbow 5s infinite;
+            -ms-animation: rainbow 5s infinite;
+            animation: rainbow 5s infinite;
+        }
+
+        @-webkit-keyframes rainbow {
+            0% { color: red; }
+            17% { color: orange; }
+            33% { color: yellow; }
+            50% { color: green; }
+            67% { color: blue; }
+            84% { color: purple; }
+            100% { color: red; }
+        }
+        @-ms-keyframes rainbow {
+            0% { color: red; }
+            17% { color: orange; }
+            33% { color: yellow; }
+            50% { color: green; }
+            67% { color: blue; }
+            84% { color: purple; }
+            100% { color: red; }
+        }
+        @keyframes rainbow {
+            0% { color: red; }
+            17% { color: orange; }
+            33% { color: yellow; }
+            50% { color: green; }
+            67% { color: blue; }
+            84% { color: purple; }
+            100% { color: red; }
+        }
+        .search-container {
+            text-align: center;
+            margin: 10px 0 0 0;
+        }
+        .search-form {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+        .search-box {
+            background: #282828;
+            border: none;
+            outline: none;
+            color: white;
+            padding: 5px 10px;
+            width: 240px;
+            height: 32px;
+            box-sizing: border-box;
+        }
+        .search-box::placeholder {
+            color: #878787;
+        }
+        .search-box:focus {
+            outline: none;
+        }
+        .search-button {
+            background: #282828;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            cursor: pointer;
+            height: 32px;
+            box-sizing: border-box;
+            font-size: 13px;
+        }
+        .search-button:hover {
+            color: white;
+            text-decoration: none;
+        }
+        .table th.id-col { width: 8%; }
+        .table th.username-col { width: 45%; }
+        .table th.pastes-col { width: 15%; }
+        .table th.comments-col { width: 15%; }
+        .table th.joined-col { width: 17%; }
+        .table th:nth-child(2),
+        .table td:nth-child(2) {
+            text-align: left;
+            padding-left: 15px;
+        }
+        h6 {
+            text-align: left;
+            margin: 20px 0 5px 5px;
+        }
+        .table td[colspan] {
+            text-align: left;
+            padding-left: 15px;
+        }
+        h1 {
+            text-align: center;
+        }
+        p {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th {
+            border-bottom: 1px solid #444;
+        }
+        th, td {
+            padding: 5px;
+            text-align: center;
+            border: 0;
+        }
+        .red {
+            color: rgb(167, 22, 22);
+        }
+        .purple {
+            color: rgb(29, 112, 26);
+        }
+        .Founder {
+            color:darkorange;
+        }
+        .green {
+            color: #189162;
+        }
+        .pink {
+            color: #5c265c;
+        }
+        .blue {
+            color: rgb(30, 104, 165);
+        }
+    </style>
+
+    
+
+</head>
+
+<body>
+    {% endblock %}
+
+    {% block bottom %}
+    <div class="col-md-12" style="margin-top: 60px;">
+        <div class="center"><br>
+        <h4>Users</h4>
+        <div class="search-container">
+            <div id="error-msg" class="error-message"></div>
+            <form id="search-form" class="search-form" method="GET" action="/users">
+                <input id="search-query" name="search_query" type="text" class="search-box" placeholder="Username..." maxlength="20" value="{{ search_query | default('') }}">
+                <button type="submit" class="search-button">Search</button>
+            </form><br>
+        </div>
+        {% if search_query %}
+        <p style="text-align:center; color: gray;">Showing results for: <strong>{{ search_query }}</strong></p>
+        {% endif %}
+
+        {% if search_mode %}
+        <div class="container">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="text-center id-col">ID</th>
+                        <th class="username-col">Username</th>
+                        <th class="text-center pastes-col">Pastes</th>
+                        <th class="text-center comments-col">Comments</th>
+                        <th class="text-center joined-col">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in search_results %}
+                    <tr>
+                        <td class="text-center">{{ user[0] }}</td>
+                        <td>{% set custom_color = get_username_color(user[1]) %}<a class="dox-username" href="{{ url_for('user', username=user[1]) }}" style="color: {{ custom_color or '#2a9fd6' }}; font-weight: bold;">{{ user[1] }}</a></td>
+                        <td class="text-center">{{ paste_counts[user[0]] if user[0] in paste_counts else 0 }}</td>
+                        <td class="text-center">{{ comment_counts[user[0]] if user[0] in comment_counts else 0 }}</td>
+                        <td class="text-center">{{ user[4]|naturaltime }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5">No users found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="container">
+
+            {% if root_users or not search_query %}
+            <h6>Founder</h6>
+            <table class="table table-striped">
+                <thead>
+                    <tr class="doxentry">
+                        <th class="text-center id-col">ID</th>
+                        <th class="username-col">Username</th>
+                        <th class="text-center pastes-col">Pastes</th>
+                        <th class="text-center comments-col">Comments</th>
+                        <th class="text-center joined-col">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in root_users %}
+                    <tr class="doxentry">
+                        <td class="text-center">{{ user[0] }}</td>
+                        <td>{% set custom_color = get_username_color(user[1]) %}<a class="dox-username" href="{{ url_for('user', username=user[1]) }}" style="color: {{ custom_color or '#FFAB02' }}; font-weight: bold;" >{{ user[1] }}</a></td>
+                        <td class="text-center">{{ paste_counts[user[0]] if user[0] in paste_counts else 0 }}</td>
+                        <td class="text-center">{{ comment_counts[user[0]] if user[0] in comment_counts else 0 }}</td>
+                        <td class="text-center">{{ user[4]|naturaltime }}</td>
+                    </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5">No users found in this rank.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+
+            {# 
+{% if admin_users or not search_query %}
+            <h6>Admin</h6>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="text-center id-col">ID</th>
+                        <th class="username-col">Username</th>
+                        <th class="text-center pastes-col">Pastes</th>
+                        <th class="text-center comments-col">Comments</th>
+                        <th class="text-center joined-col">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in admin_users %}
+                        <tr>
+                            <td class="text-center">{{ user[0] }}</td>
+                            <td>{% set custom_color = get_username_color(user[1]) %}<a class="dox-username" href="{{ url_for('user', username=user[1]) }}" style="color: {{ custom_color or '#ff0000' }}; font-weight: bold; background-image: url('{{ url_for('static', filename='files/red.gif') }}');" >{{ user[1] }}</a></td>
+                            <td class="text-center">{{ paste_counts[user[0]] if user[0] in paste_counts else 0 }}</td>
+                            <td class="text-center">{{ comment_counts[user[0]] if user[0] in comment_counts else 0 }}</td>
+                            <td class="text-center">{{ user[4]|naturaltime }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5">No users found in this rank.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+{% endif %}
+#}
+
+
+            {% if manager_users or not search_query %}
+            <h6>Manager</h6>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="text-center id-col">ID</th>
+                        <th class="username-col">Username</th>
+                        <th class="text-center pastes-col">Pastes</th>
+                        <th class="text-center comments-col">Comments</th>
+                        <th class="text-center joined-col">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in manager_users %}
+                        <tr>
+                            <td class="text-center">{{ user[0] }}</td>
+                            <td>{% set custom_color = get_username_color(user[1]) %}<a class="dox-username" href="{{ url_for('user', username=user[1]) }}" style="color: {{ custom_color or '#BB71E4' }}; font-weight: bold; background-image: url('{{ url_for('static', filename='files/purple.gif') }}');" >{{ user[1] }}</a></td>
+                            <td class="text-center">{{ paste_counts[user[0]] if user[0] in paste_counts else 0 }}</td>
+                            <td class="text-center">{{ comment_counts[user[0]] if user[0] in comment_counts else 0 }}</td>
+                            <td class="text-center">{{ user[4]|naturaltime }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5">No users found in this rank.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+
+            {% if mod_users or not search_query %}
+            <h6>Mod</h6>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="text-center id-col">ID</th>
+                        <th class="username-col">Username</th>
+                        <th class="text-center pastes-col">Pastes</th>
+                        <th class="text-center comments-col">Comments</th>
+                        <th class="text-center joined-col">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in mod_users %}
+                        <tr>
+                            <td class="text-center">{{ user[0] }}</td>
+                            <td>{% set custom_color = get_username_color(user[1]) %}<a class="dox-username" href="{{ url_for('user', username=user[1]) }}" style="color: {{ custom_color or '#39FF14' }}; font-weight: bold;" >{{ user[1] }}</a></td>
+                            <td class="text-center">{{ paste_counts[user[0]] if user[0] in paste_counts else 0 }}</td>
+                            <td class="text-center">{{ comment_counts[user[0]] if user[0] in comment_counts else 0 }}</td>
+                            <td class="text-center">{{ user[4]|naturaltime }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5">No users found in this rank.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+
+            {% if council_users or not search_query %}
+            <h6>Council</h6>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="text-center id-col">ID</th>
+                        <th class="username-col">Username</th>
+                        <th class="text-center pastes-col">Pastes</th>
+                        <th class="text-center comments-col">Comments</th>
+                        <th class="text-center joined-col">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in council_users %}
+                        <tr>
+                            <td class="text-center">{{ user[0] }}</td>
+                            <td>{% set custom_color = get_username_color(user[1]) %}<a class="dox-username" href="{{ url_for('user', username=user[1]) }}" style="color: {{ custom_color or '#87cefa' }}; font-weight: bold;" >{{ user[1] }}</a></td>
+                            <td class="text-center">{{ paste_counts[user[0]] if user[0] in paste_counts else 0 }}</td>
+                            <td class="text-center">{{ comment_counts[user[0]] if user[0] in comment_counts else 0 }}</td>
+                            <td class="text-center">{{ user[4]|naturaltime }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5">No users found in this rank.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+
+            {% if helper_users or not search_query %}
+            <h6>Helper</h6>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="text-center id-col">ID</th>
+                        <th class="username-col">Username</th>
+                        <th class="text-center pastes-col">Pastes</th>
+                        <th class="text-center comments-col">Comments</th>
+                        <th class="text-center joined-col">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in helper_users %}
+                        <tr>
+                            <td class="text-center">{{ user[0] }}</td>
+                            <td>{% set custom_color = get_username_color(user[1]) %}<a class="dox-username" href="{{ url_for('user', username=user[1]) }}" style="color: {{ custom_color or '#5555FF' }}; font-weight: bold;" >{{ user[1] }}</a></td>
+                            <td class="text-center">{{ paste_counts[user[0]] if user[0] in paste_counts else 0 }}</td>
+                            <td class="text-center">{{ comment_counts[user[0]] if user[0] in comment_counts else 0 }}</td>
+                            <td class="text-center">{{ user[4]|naturaltime }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5">No users found in this rank.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+
+            {% if clique_users or not search_query %}
+            <h6>Clique</h6>
+            <table class="table table-striped">
+                <thead>
+                    <tr class="doxentry">
+                        <th class="text-center id-col">ID</th>
+                        <th class="username-col">Username</th>
+                        <th class="text-center pastes-col">Pastes</th>
+                        <th class="text-center comments-col">Comments</th>
+                        <th class="text-center joined-col">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in clique_users %}
+                    <tr class="doxentry">
+                        <td class="text-center">{{ user[0] }}</td>
+                        <td>{% set custom_color = get_username_color(user[1]) %}<a class="dox-username" href="{{ url_for('user', username=user[1]) }}" style="color: {{ custom_color or '#095699' }}; font-weight: bold;" >{{ user[1] }}</a></td>
+                        <td class="text-center">{{ paste_counts[user[0]] if user[0] in paste_counts else 0 }}</td>
+                        <td class="text-center">{{ comment_counts[user[0]] if user[0] in comment_counts else 0 }}</td>
+                        <td class="text-center">{{ user[4]|naturaltime }}</td>
+                    </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5">No users found in this rank.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+
+            {% if rich_users or not search_query %}
+            <h6>Rich</h6>
+            <table class="table table-striped">
+                <thead>
+                    <tr class="doxentry">
+                        <th class="text-center id-col">ID</th>
+                        <th class="username-col">Username</th>
+                        <th class="text-center pastes-col">Pastes</th>
+                        <th class="text-center comments-col">Comments</th>
+                        <th class="text-center joined-col">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in rich_users %}
+                    <tr class="doxentry">
+                        <td class="text-center">{{ user[0] }}</td>
+                        <td>{% set custom_color = get_username_color(user[1]) %}<a class="dox-username" href="{{ url_for('user', username=user[1]) }}" style="color: {{ custom_color or '#FFD700' }}; font-weight: bold; background-image: url('{{ url_for('static', filename='files/gold.gif') }}');" >{{ user[1] }}</a></td>
+                        <td class="text-center">{{ paste_counts[user[0]] if user[0] in paste_counts else 0 }}</td>
+                        <td class="text-center">{{ comment_counts[user[0]] if user[0] in comment_counts else 0 }}</td>
+                        <td class="text-center">{{ user[4]|naturaltime }}</td>
+                    </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5">No users found in this rank.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+
+            {% if criminal_users or not search_query %}
+            <h6>Criminal</h6>
+            <table class="table table-striped">
+                <thead>
+                    <tr class="doxentry">
+                        <th class="text-center id-col">ID</th>
+                        <th class="username-col">Username</th>
+                        <th class="text-center pastes-col">Pastes</th>
+                        <th class="text-center comments-col">Comments</th>
+                        <th class="text-center joined-col">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in criminal_users %}
+                    <tr class="doxentry">
+                        <td class="text-center">{{ user[0] }}</td>
+                        <td>{% set custom_color = get_username_color(user[1]) %}<a class="dox-username" href="{{ url_for('user', username=user[1]) }}" style="color: {{ custom_color or '#780A48' }}; font-weight: bold;" >{{ user[1] }}</a></td>
+                        <td class="text-center">{{ paste_counts[user[0]] if user[0] in paste_counts else 0 }}</td>
+                        <td class="text-center">{{ comment_counts[user[0]] if user[0] in comment_counts else 0 }}</td>
+                        <td class="text-center">{{ user[4]|naturaltime }}</td>
+                    </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5">No users found in this rank.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+
+            {% if vip_users or not search_query %}
+            <h6>VIP</h6>
+            <table class="table table-striped">
+                <thead>
+                    <tr class="doxentry">
+                        <th class="text-center id-col">ID</th>
+                        <th class="username-col">Username</th>
+                        <th class="text-center pastes-col">Pastes</th>
+                        <th class="text-center comments-col">Comments</th>
+                        <th class="text-center joined-col">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in vip_users %}
+                    <tr class="doxentry">
+                        <td class="text-center">{{ user[0] }}</td>
+                        <td>{% set custom_color = get_username_color(user[1]) %}<a class="dox-username" href="{{ url_for('user', username=user[1]) }}" style="color: {{ custom_color or '#9B318E' }}; font-weight: bold;" >{{ user[1] }}</a></td>
+                        <td class="text-center">{{ paste_counts[user[0]] if user[0] in paste_counts else 0 }}</td>
+                        <td class="text-center">{{ comment_counts[user[0]] if user[0] in comment_counts else 0 }}</td>
+                        <td class="text-center">{{ user[4]|naturaltime }}</td>
+                    </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5">No users found in this rank.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+
+            {% if regular_users or not search_query %}
+            <h6>Users</h6>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="text-center id-col">ID</th>
+                        <th class="username-col">Username</th>
+                        <th class="text-center pastes-col">Pastes</th>
+                        <th class="text-center comments-col">Comments</th>
+                        <th class="text-center joined-col">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in regular_users %}
+                        <tr>
+                            <td class="text-center">{{ user[0] }}</td>
+                            <td>{% set custom_color = get_username_color(user[1]) %}<a class="dox-username" href="{{ url_for('user', username=user[1]) }}" style="color: {{ custom_color or '#2a9fd6' }}; font-weight: bold;" >{{ user[1] }}</a></td>
+                            <td class="text-center">{{ paste_counts[user[0]] if user[0] in paste_counts else 0 }}</td>
+                            <td class="text-center">{{ comment_counts[user[0]] if user[0] in comment_counts else 0 }}</td>
+                            <td class="text-center">{{ user[4]|naturaltime }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5">No users found in this rank.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    });
+</script>
+</body>
+
+</html>
+{% endblock %}

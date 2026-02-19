@@ -1,0 +1,564 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOA | Rarbin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='legacy/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='files/dropdown.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='files/bootstrap.min.js') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='files/doxbin.css') }}">
+    <link rel="canonical" href="https://rarbin.com/hoa"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        html {
+            overflow-x: hidden;
+        }
+
+        input[type=text],
+        select,
+        option {
+            line-height: 1.2;
+            color: white;
+            background: #282828;
+            border: 0;
+            border-radius: 2px;
+            display: inline-block;
+            -webkit-font-smoothing: antialiased;
+            outline: none;
+            padding: 7px 5px;
+            width: 200px;
+        }
+
+        input[type=text]::placeholder {
+            color: rgb(167, 167, 167);
+        }
+
+        input[type=submit] {
+            line-height: 1.2;
+            color: white;
+            background: #282828;
+            border: 0;
+            border-radius: 2px;
+            display: inline-block;
+            -webkit-font-smoothing: antialiased;
+            outline: none;
+            padding: 7px 5px;
+        }
+
+        input,
+        select,
+        option {
+            font-size: 100%;
+        }
+
+        input[type=submit]:hover {
+            color: white;
+            background: #3d3d3d;
+            text-decoration: none;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .admin-text {
+            color: red;
+            font-weight: bold;
+        }
+
+        .doxbin-text {
+            text-align: center;
+            background-color: inherit;
+            line-height: 15px;
+            border: none;
+            color: rgb(255, 0, 0);
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+
+        .hoa-title {
+            margin: 5px 0 0 0;
+            letter-spacing: 2px;
+        }
+
+        .hoa-container {
+            border: solid 1px rgb(40, 40, 40);
+            background-color: rgb(14, 14, 14);
+            width: 32%;
+            border-radius: 2px;
+            float: left;
+            margin: 10px 5px 10px 5px;
+            position: relative;
+            padding: 15px;
+            -webkit-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+            -moz-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+            box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+            height: 460px;
+        }
+
+        .hoa-container:hover {
+            border: solid 1px rgb(44, 44, 44);
+            background-color: rgb(18, 18, 18);
+        }
+
+        .hoa-container .hoa-image {
+            text-align: center;
+            max-height: 215px;
+            border-bottom: solid 1px rgb(40, 40, 40);
+        }
+
+        .hoa-container .hoa-image img {
+            width: 100%;
+            height: 200px;
+            max-width: 200px;
+            max-height: 200px;
+            margin-bottom: 15px;
+        }
+
+        .hoa-container .hoa-name {
+            padding-top: 10px;
+            text-align: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .hoa-container .hoa-description {
+            margin-top: 5px;
+            text-align: center;
+            color: rgb(200, 200, 200);
+            word-wrap: break-word;
+            overflow-y: auto;
+            height: 160px;
+        }
+
+        @media only screen and (max-width: 991px) {
+            .hoa-container {
+                width: 48%;
+            }
+        }
+
+        @media only screen and (max-width: 575px) {
+            .hoa-container {
+                width: 100%;
+            }
+        }
+
+        @media only screen and (max-width: 271px) {
+            .doxbin-text {
+                font-size: 9px;
+                line-height: 10px;
+            }
+
+            .hoa-title {
+                font-size: 16px;
+                letter-spacing: 2px;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #cacaca;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgb(110, 110, 110);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgb(68, 68, 68);
+        }
+
+        .rainbow {
+            text-shadow: 2px 2px 4px #000000;
+
+            -webkit-animation: rainbow 5s infinite;
+
+            -ms-animation: rainbow 5s infinite;
+
+            animation: rainbow 5s infinite;
+        }
+
+        @-webkit-keyframes rainbow {
+            0% {
+                color: red;
+            }
+
+            17% {
+                color: orange;
+            }
+
+            33% {
+                color: yellow;
+            }
+
+            50% {
+                color: green;
+            }
+
+            67% {
+                color: blue;
+            }
+
+            84% {
+                color: purple;
+            }
+
+            100% {
+                color: red;
+            }
+        }
+
+        @-ms-keyframes rainbow {
+            0% {
+                color: red;
+            }
+
+            17% {
+                color: orange;
+            }
+
+            33% {
+                color: yellow;
+            }
+
+            50% {
+                color: green;
+            }
+
+            67% {
+                color: blue;
+            }
+
+            84% {
+                color: purple;
+            }
+
+            100% {
+                color: red;
+            }
+        }
+
+        @keyframes rainbow {
+            0% {
+                color: red;
+            }
+
+            17% {
+                color: orange;
+            }
+
+            33% {
+                color: yellow;
+            }
+
+            50% {
+                color: green;
+            }
+
+            67% {
+                color: blue;
+            }
+
+            84% {
+                color: purple;
+            }
+
+            100% {
+                color: red;
+            }
+        }
+
+        .sparkle {
+            pointer-events: none;
+            position: fixed;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 8px;
+            animation: sparkle-fade 0.8s forwards;
+            z-index: 1000;
+            text-shadow: 0 0 3px currentColor;
+        }
+
+        @keyframes sparkle-fade {
+            0% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(0.9) translateY(-10px);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.6) translateY(-20px);
+            }
+        }
+    </style>
+
+    <script>
+        (function() {
+            const sparkleChars = ['✦', '✧', '✯', '✬', '✫', '*'];
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            let mouseX = 0;
+            let mouseY = 0;
+            let isMoving = false;
+            let movementTimeout = null;
+            let sparkleInterval = null;
+
+            function createSparkle() {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                
+                const offsetX = (Math.random() - 0.5) * 20;
+                const offsetY = (Math.random() - 0.5) * 20;
+                
+                sparkle.style.left = (mouseX + offsetX) + 'px';
+                sparkle.style.top = (mouseY + offsetY) + 'px';
+                sparkle.style.color = colors[Math.floor(Math.random() * colors.length)];
+                sparkle.textContent = sparkleChars[Math.floor(Math.random() * sparkleChars.length)];
+                
+                document.body.appendChild(sparkle);
+                
+                setTimeout(() => {
+                    sparkle.remove();
+                }, 800);
+            }
+
+            function updateMousePosition(e) {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                
+                if (!isMoving) {
+                    isMoving = true;
+                    sparkleInterval = setInterval(createSparkle, 50);
+                }
+                
+                if (movementTimeout) {
+                    clearTimeout(movementTimeout);
+                }
+                
+                movementTimeout = setTimeout(() => {
+                    isMoving = false;
+                    if (sparkleInterval) {
+                        clearInterval(sparkleInterval);
+                        sparkleInterval = null;
+                    }
+                }, 100);
+            }
+
+            function stopSparkles() {
+                isMoving = false;
+                if (sparkleInterval) {
+                    clearInterval(sparkleInterval);
+                    sparkleInterval = null;
+                }
+                if (movementTimeout) {
+                    clearTimeout(movementTimeout);
+                    movementTimeout = null;
+                }
+            }
+
+            document.addEventListener('mousemove', updateMousePosition);
+            document.addEventListener('mouseleave', stopSparkles);
+
+            window.addEventListener('beforeunload', () => {
+                document.removeEventListener('mousemove', updateMousePosition);
+                document.removeEventListener('mouseleave', stopSparkles);
+                stopSparkles();
+            });
+        })();
+
+        (function () {
+            const hoaAudio = document.getElementById('hoa-audio');
+            hoaAudio.volume = 0.2;
+
+            function catchHandler() {
+                let inputListener;
+                inputListener = function () {
+                    hoaAudio.play();
+                    document.removeEventListener('mousedown', inputListener);
+                    document.removeEventListener('keydown', inputListener);
+                };
+
+                document.addEventListener('mousedown', inputListener);
+                document.addEventListener('keydown', inputListener);
+            }
+
+            if (hoaAudio.readyState > 1) {
+                hoaAudio.play().catch(catchHandler);
+            } else {
+                hoaAudio.addEventListener('canplay', function () {
+                    hoaAudio.play().catch(catchHandler);
+                });
+            }
+        })();
+    </script>
+
+</head>
+
+<body>
+    {% endblock %}
+
+    {% block bottom %}
+    <div class="col-md-12" style="margin-top: 60px;">
+        <div class="center">
+            <h2 class="hoa-title rainbow"><b>HALL OF AUTISM</b></h2>
+        </div>
+        <div class="container" style="margin-top:20px;">
+
+            <div class="hoa-container">
+                <div class="hoa-image">
+                    <img src="{{ url_for('static', filename='files/hoa/LazyK.jpg') }}">
+                </div>
+                <div class="hoa-name rainbow">
+                    <b>LazyK</b>
+                </div>
+                <div class="hoa-description">
+                    <b>Ayden Quiles</b><br>
+                                        lazy k is a extorter that claims "harm" then went to get pasted the next day he cheats on his gf with age players and then cries when something happens to him he  claimed he was going to fed people in tramatic then got pasted and swatted the next day
+                    <br>
+                    <a href="/post/0x03-Lazyk-Tramatic-x-Cruel">Dox</a>
+                    <br>
+                </div>
+            </div>
+
+            <div class="hoa-container">
+                <div class="hoa-image">
+                    <img src="{{ url_for('static', filename='files/hoa/tech.jpg') }}">
+                </div>
+                <div class="hoa-name rainbow">
+                    <b>Tech Gangster</b>
+                </div>
+                <div class="hoa-description">
+                    <b>Brent Vasily Jones</b><br>
+                    Tech gangster is a grown man who doesnt have a job and got kicked out of his house and is now living with his grandpa in his basement with his dog and hes got arrested for beating his gf and public intoxication multiple times and while have a room temp iq claims to be a "hacker" but got all his shit dropped hes a lame excuse for a man
+                    <br>
+                    <a href="/post/0x02-techgangster-pedo">Dox</a>
+                    <br>
+                </div>
+            </div>
+
+            <div class="hoa-container">
+                <div class="hoa-image">
+                    <img src="{{ url_for('static', filename='files/hoa/ayham.png') }}">
+                </div>
+                <div class="hoa-name rainbow">
+                    <b>Ayhxm</b>
+                </div>
+                <div class="hoa-description">
+                    <b>Ayham Abu Shama</b><br>
+                    This guy is the biggest weirdo I've ever seen in my life, He has been caught talking to multiple kids. Multiple times, Continued to Deny it, Even with Proof, of him having a 16 year old girl cut herself for him. This was the 4th instance, of this kind of offense. This Retard pedophile, Ordered a 100$ Roblox gift card, PHYSICALLY from Walmart, To his House Address. His Dox has been long awaited, All of the details on paste, are Confirmed by Him. This guy also, Got a 16 year old girl in his area, Pregnant. He is 19, Turning 20. His father is a Doctor who beats him for spending his Money. This guy, is also a well known "internet scammer". Scamming, Friends, and randoms. Claimed he was untouchable. #FuckedbyWalmart.com
+                    <br>
+                    <a href="/post/Ayham-arabjinn-Arab-Devil">Dox</a>
+                    <br>
+                </div>
+            </div>
+
+            <div class="hoa-container">
+                <div class="hoa-image">
+                    <img src="{{ url_for('static', filename='files/hoa/aiko.png') }}">
+                </div>
+                <div class="hoa-name rainbow">
+                    <b>Aiko</b>
+                </div>
+                <div class="hoa-description">
+                    <b>Ying One</b><br>
+                    Aiko is a comslut that tried to make false allegations on one of our staff members, then got pasted and cried like a bitch to her eboys to get an IC3 report made because of the dox. Overall, a sad eslut that has a cuck addiction.
+                    <br>
+                    <a href="/post/aiko-dh-ewhore">Dox</a>
+                    <br>
+                </div>
+            </div>
+
+            <div class="hoa-container">
+                <div class="hoa-image">
+                    <img src="{{ url_for('static', filename='files/hoa/112.png') }}">
+                </div>
+                <div class="hoa-name rainbow">
+                    <b>112</b>
+                </div>
+                <div class="hoa-description">
+                    <b>Troy "Allen" Howard</b><br>
+                    112, also known as Troy
+                    Allen Howard, is a retard
+                    who extorts little girl's and has CP.
+                    He spends his free time being a loser
+                    thinking being known on vrchat is a flex.
+                    <br>
+                    <a href="/post/112-VRC">Dox</a>
+                    <br>
+                </div>
+            </div>
+
+            <div class="hoa-container">
+                <div class="hoa-image">
+                    <img src="{{ url_for('static', filename='files/hoa/blue.jpg') }}">
+                </div>
+                <div class="hoa-name rainbow">
+                    <b>Blue Phoenix</b>
+                </div>
+                <div class="hoa-description">
+                    <b>Lyndsey M Dubose</b><br>
+                    Lyndsey M Dubose, alias
+                    BluePhoenix, has been
+                    dating Bogi (h9jv) since
+                    he was 18. She is 45 years old
+		            She has asked minors for lewd
+                    pictures and recieved them
+                    several times.
+                    <br>
+                    <a href="/post/Blue-Phoenix-VRC">Dox</a>
+                    <br>
+                </div>
+            </div>
+
+
+            {% for looser in loosers_list %}
+
+            {% endfor %}
+
+        </div>
+    </div>
+</body>
+
+
+<audio id="hoa-audio"></audio>
+
+<script>
+(function () {
+    const hoaAudio = document.getElementById('hoa-audio');
+
+    const songs = [
+        "{{ url_for('static', filename='files/hoa.mp3') }}",
+        "{{ url_for('static', filename='files/swathoa.mp3') }}"
+    ];
+
+    const randomSong = songs[Math.floor(Math.random() * songs.length)];
+    hoaAudio.src = randomSong;
+
+    hoaAudio.loop = true;
+
+    function playAudio() {
+        hoaAudio.play().catch(error => {
+            console.error('Error playing audio:', error);
+        });
+    }
+
+    document.addEventListener('mousedown', playAudio, { once: true });
+    document.addEventListener('keydown', playAudio, { once: true });
+})();
+</script>
+
+
+</html>
+{% endblock %}

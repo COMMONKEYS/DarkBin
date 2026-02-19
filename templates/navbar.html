@@ -1,0 +1,1065 @@
+{% block top %}
+{% endblock %}
+
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='files/chat.css') }}">
+
+<style>
+@keyframes green-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(0, 255, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 255, 0, 0);
+  }
+}
+
+@keyframes bell-ring {
+  0%, 100% { transform: rotate(0deg); }
+  10%, 30%, 50%, 70%, 90% { transform: rotate(10deg); }
+  20%, 40%, 60%, 80% { transform: rotate(-10deg); }
+}
+
+.chat-container {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 20px !important;
+    width: 600px !important;
+    height: 400px !important;
+    background: #1a1a1a !important;
+    border: 1px solid #333 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    z-index: 1000 !important;
+    isolation: isolate !important;
+}
+.chat-header {
+    padding: 4px 8px !important;
+    background: #222 !important;
+    border-bottom: 1px solid #333 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    color: #fff !important;
+    font-size: 12px !important;
+}
+.chat-messages {
+    flex: 1 !important;
+    overflow-y: scroll !important;
+    padding: 8px 8px 8px 8px !important;
+    font-size: 12px !important;
+    overscroll-behavior: contain !important;
+    -ms-overflow-style: none !important;
+}
+.chat-input-container {
+    padding: 8px !important;
+    border-top: 1px solid #333 !important;
+    display: flex !important;
+    gap: 8px !important;
+}
+.chat-input {
+    flex: 1 !important;
+    padding: 6px !important;
+    border: 1px solid #333 !important;
+    background: #222 !important;
+    color: #fff !important;
+    font-size: 12px !important;
+}
+.chat-send-btn {
+    padding: 6px 12px !important;
+    background: #333 !important;
+    border: none !important;
+    color: #fff !important;
+    cursor: pointer !important;
+    font-size: 12px !important;
+    border-radius: 0 !important;
+}
+.message {
+    margin: 2px 0 !important;
+    padding: 2px 2px 2px 0 !important;
+    word-wrap: break-word !important;
+    cursor: pointer !important;
+    display: block !important;
+}
+.message .author {
+    white-space: nowrap !important;
+    display: inline !important;
+}
+.message .content {
+    color: #fff !important;
+    display: inline !important;
+}
+.message .content span {
+    display: inline !important;
+}
+.message .chat-timestamp {
+    color: #888 !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+    display: inline !important;
+}
+.chat-toggle {
+    position: fixed !important;
+    bottom: 20px !important;
+    left: 20px !important;
+    padding: 8px 16px !important;
+    background: #333 !important;
+    color: #fff !important;
+    border: none !important;
+    cursor: pointer !important;
+    z-index: 999 !important;
+    font-size: 12px !important;
+    border-radius: 0 !important;
+}
+.chat-container.hidden {
+    display: none !important;
+}
+.chat-msg-modal {
+    display: none !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.85) !important;
+    z-index: 1001 !important;
+}
+
+.chat-msg-modal.show {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.chat-msg-modal-content {
+    background: #141414 !important;
+    padding: 24px !important;
+    width: 90% !important;
+    max-width: 400px !important;
+    color: #fff !important;
+    border: 1px solid #333 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+}
+
+#chat-msg-info {
+    color: #fff !important;
+    margin-bottom: 24px !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    padding: 10px !important;
+    word-break: break-word !important;
+}
+
+#chat-msg-info a:hover {
+    text-decoration: underline !important;
+}
+
+.chat-msg-info-header {
+    color: #888 !important;
+    font-size: 12px !important;
+    margin-bottom: 4px !important;
+}
+
+.chat-msg-button-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+.chat-msg-button {
+    background: #1E1E1E !important;
+    border: 1px solid #333 !important;
+    color: #fff !important;
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+    cursor: pointer !important;
+    width: 100% !important;
+    text-align: center !important;
+    border-radius: 0 !important;
+}
+
+.chat-close {
+    background: none !important;
+    border: none !important;
+    color: #fff !important;
+    font-size: 20px !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+}
+
+.chat-close:hover {
+    color: #ff0000 !important;
+}
+
+@media (max-width: 768px) {
+    .chat-container {
+        width: 100% !important;
+        left: 0 !important;
+        bottom: 0 !important;
+        border: none !important;
+        border-top: 1px solid #333 !important;
+    }
+
+    .chat-toggle {
+        left: 10px !important;
+    }
+
+    .chat-input {
+        font-size: 16px !important;
+    }
+}
+
+.message a:hover {
+    text-decoration: underline !important;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #333;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: #fff;
+}
+
+input:checked + .slider {
+    background-color: #ff0000;
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+.notification-bell {
+  transition: color 0.3s ease;
+}
+
+.notification-bell:hover {
+  color: #ffd700 !important;
+}
+
+.notification-bell.has-notifications {
+  animation: bell-ring 1s ease-in-out;
+}
+
+.notification-badge {
+  transition: all 0.3s ease;
+}
+
+#notifications-container {
+    max-height: 400px;
+    overflow-y: auto;
+    background: #000000;
+}
+#notifications-container > div {
+    padding: 4px 15px;
+    border-bottom: 1px solid #282828;
+    background: #000000;
+}
+.notification-message {
+    white-space: normal;
+    word-break: break-word;
+    display: block;
+    font-size: 13px;
+    line-height: 16px;
+}
+.notification-message a {
+    color: #2A9FD6 !important;
+    text-decoration: none !important;
+    display: inline;
+}
+.notification-message a:hover {
+    color: #2A9FD6 !important;
+    text-decoration: underline !important;
+}
+#notifications-container::-webkit-scrollbar {
+    width: 8px !important;
+}
+#notifications-container::-webkit-scrollbar-track {
+    background: #060606 !important;
+}
+#notifications-container::-webkit-scrollbar-thumb {
+    background: #282828 !important;
+    border-radius: 4px !important;
+}
+#notifications-container::-webkit-scrollbar-thumb:hover {
+    background: #333 !important;
+}
+#notification-dropdown {
+    border-radius: 4px;
+}
+#notification-dropdown::before {
+    display: none;
+}
+.notification-highlight {
+    background: rgba(255, 255, 0, 0.1) !important;
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  min-height: 40px;
+}
+
+.navbar .container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.navbar-nav > li > a {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.navbar-brand {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  font-size: 18px;
+  height: 45px;
+  line-height: 21px;
+}
+
+.navbar {
+  min-height: 45px;
+}
+
+.navbar-header {
+  height: 45px;
+}
+
+body {
+  padding-top: 45px;
+}
+.user-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: bold;
+  background-repeat: repeat;
+  background-size: cover;
+  color: #fff;
+}
+.admin-badge {
+  background-image: url('{{ url_for('static', filename='files/red.gif') }}');
+}
+.manager-badge {
+  background-image: url('{{ url_for('static', filename='files/purple.gif') }}');
+}
+.rich-badge {
+  background-image: url('{{ url_for('static', filename='files/gold.gif') }}');
+}
+</style>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                aria-expanded="false" aria-controls="navbar">
+                Please log in from your computer
+            </button>
+            <a style="color: rgb(255, 255, 255);" class="navbar-brand" href="{{ url_for('index') }}">
+                Rarbin 
+            </a>
+        </div>
+
+        <div id="navbar" class="collapse navbar-collapse">
+            <ul style="color: white;" class="nav navbar-nav">
+                <li class="">
+                    <a href="{{ url_for('index') }}">
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('new_paste') }}">
+                        Add Paste
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('users') }}">
+                        Users
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('upgrades') }}">
+                        Upgrades
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('hall_of_loosers') }}">
+                        Hall of Autism
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('support') }}">
+                        Support
+                    </a>
+                </li>
+                <li>
+                    <a href="https://t.me/Rarbin_news">
+                        Telegram
+                    </a>
+                </li>
+                {% if username and user_status in ['root', 'admin', 'manager'] %}
+                <li>
+                    <a href="{{ url_for('admin_panel') }}">
+                        Admin
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+            <div class="sidebar-right">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="#" style="padding-top: 12px; padding-bottom: 12px; line-height: 21px; font-size: 14px;">
+                            <span class="online-count" style="font-size: 14px;">
+                                <span style="display: inline-block; width: 5px; height: 5px; background: #00ff00; border-radius: 50%; margin-right: 6px; animation: green-pulse 2s infinite; vertical-align: middle;"></span>
+                                <span class="online-count-number" id="online-count-number" style="color: #00ff00 !important;">{{ online_count }}</span>
+                            </span>
+                        </a>
+                    </li>
+                    {% if username %}
+                    <li style="position: relative;">
+                        <a href="#" class="notification-bell notification-icon" style="color: #ffffff !important; text-decoration: none; font-size: 14px; position: relative; padding-top: 12px; padding-bottom: 12px; line-height: 21px;">
+                            <img src="{{ url_for('static', filename='files/bell-solid.svg') }}" alt="Notifications" style="width: 16px; height: 16px; filter: brightness(0) saturate(0) invert(0.5);">
+                            <span class="notification-badge" id="notification-count" style="position: absolute; top: 6px; right: 6px; background: #ff0000; color: white; border-radius: 50%; width: 14px; height: 14px; font-size: 9px; display: flex; align-items: center; justify-content: center; display: none;">0</span>
+                        </a>
+                        <div id="notification-dropdown" style="
+                            position: absolute;
+                            top: 100%;
+                            right: 0;
+                            width: 350px;
+                            background: #000000;
+                            border: 1px solid #282828;
+                            border-radius: 4px;
+                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+                            z-index: 10001;
+                            display: none;
+                            margin-top: 5px;
+                        ">
+                            <div style="
+                                padding: 15px;
+                                border-bottom: 1px solid #282828;
+                                background: #060606;
+                                border-radius: 4px 4px 0 0;
+                            ">
+                                <h4 style="margin: 0; color: #ffffff; font-size: 16px;">Notifications</h4>
+                            </div>
+                            <div id="notifications-container">
+                            </div>
+                        </div>
+                    </li>
+                    {% endif %}
+                    {% if username %}
+                        <li>
+                            {% if user_status == 'root' %}
+                                {% set custom_color = get_username_color(username) %}
+                                <a href="{{ url_for('user', username=username) }}" style="color: {{ custom_color or '#FFAB02' }}; font-weight: bold;">
+                                    {{ username }} <span style="color: #FFAB02;">[Founder]</span>
+                                </a>
+                            {% elif user_status == 'admin' %}
+                                {% set custom_color = get_username_color(username) %}
+                                <a href="{{ url_for('user', username=username) }}" style="color: {{ custom_color or '#ff0000' }}; font-weight: bold;">
+                                    <span class="user-badge admin-badge"><span class="username" style="color: {{ custom_color or '#ff0000' }} !important;">{{ username }}</span> <span class="status" style="color: #ff0000;">[Admin]</span></span>
+                                </a>
+                            {% elif user_status == 'manager' %}
+                                {% set custom_color = get_username_color(username) %}
+                                <a href="{{ url_for('user', username=username) }}" style="color: {{ custom_color or '#BB71E4' }}; font-weight: bold;">
+                                    <span class="user-badge manager-badge"><span class="username" style="color: {{ custom_color or '#BB71E4' }} !important;">{{ username }}</span> <span class="status" style="color: #BB71E4;">[Manager]</span></span>
+                                </a>
+                            {% elif user_status == 'mod' %}
+                                {% set custom_color = get_username_color(username) %}
+                                <a href="{{ url_for('user', username=username) }}" style="color: {{ custom_color or '#39FF14' }}; font-weight: bold;">
+                                    {{ username }} <span style="color: #39FF14;">[Mod]</span>
+                                </a>
+                            {% elif user_status == 'council' %}
+                                {% set custom_color = get_username_color(username) %}
+                                <a href="{{ url_for('user', username=username) }}" style="color: {{ custom_color or '#87CEFA' }}; font-weight: bold;">
+                                    {{ username }} <span style="color: #87CEFA;">[Council]</span>
+                                </a>
+                            {% elif user_status == 'helper' %}
+                                {% set custom_color = get_username_color(username) %}
+                                <a href="{{ url_for('user', username=username) }}" style="color: {{ custom_color or '#5555FF' }}; font-weight: bold;">
+                                    {{ username }} <span style="color: #5555FF;">[Helper]</span>
+                                </a>
+                            {% elif user_status == 'clique' %}
+                                {% set custom_color = get_username_color(username) %}
+                                <a href="{{ url_for('user', username=username) }}" style="color: {{ custom_color or '#095699' }}; font-weight: bold;">
+                                    {{ username }} <span style="color: #095699;">[Clique]</span>
+                                </a>
+                            {% elif user_status == 'rich' %}
+                                {% set custom_color = get_username_color(username) %}
+                                <a href="{{ url_for('user', username=username) }}" style="color: {{ custom_color or '#FFD700' }}; font-weight: bold;">
+                                    <span class="user-badge rich-badge"><span class="username" style="color: {{ custom_color or '#FFD700' }} !important;">{{ username }}</span> <span class="status" style="color: #FFD700;">[Rich]</span></span>
+                                </a>
+                            {% elif user_status == 'criminal' %}
+                                {% set custom_color = get_username_color(username) %}
+                                <a href="{{ url_for('user', username=username) }}" style="color: {{ custom_color or '#780A48' }}; font-weight: bold;">
+                                    {{ username }} <span style="color: #780A48;">[Criminal]</span>
+                                </a>
+                            {% elif user_status == 'vip' %}
+                                {% set custom_color = get_username_color(username) %}
+                                <a href="{{ url_for('user', username=username) }}" style="color: {{ custom_color or '#9B318E' }}; font-weight: bold;">
+                                    {{ username }} <span style="color: #9B318E;">[VIP]</span>
+                                </a>
+                            {% elif user_status == 'user' %}
+                                {% set custom_color = get_username_color(username) %}
+                                <a href="{{ url_for('user', username=username) }}" style="color: {{ custom_color or '#2a9fd6' }}; font-weight: bold;">
+                                    {{ username }}
+                                </a>
+                            {% else %}
+                                {% set custom_color = get_username_color(username) %}
+                                <a href="{{ url_for('user', username=username) }}" style="color: {{ custom_color or '#bfbfbf' }};">
+                                    {{ username }}
+                                </a>
+                            {% endif %}
+                        </li>
+                    {% else %}
+                        <li><a href="{{ url_for('login') }}">Login</a></li>
+                        <li><a href="{{ url_for('register') }}">Register</a></li>
+                    {% endif %}
+                    {% if username %}
+                        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<script>
+function updateOnlineCount() {
+    fetch('/online_count')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('online-count-number').textContent = data.online_count;
+        });
+}
+
+let modalOpen = false;
+let currentNotifications = [];
+let lastSeenTimestamp = 0;
+let initialUnreadIds = new Set();
+
+function updateNotifications() {
+    const notificationBell = document.querySelector('.notification-bell');
+    const notificationBadge = document.getElementById('notification-count');
+    
+    fetch('/notifications/count')
+        .then(response => response.json())
+        .then(data => {
+            const count = data.count;
+            if (count > 0) {
+                notificationBadge.textContent = count;
+                notificationBadge.style.display = 'flex';
+                notificationBell.classList.add('has-notifications');
+                
+                setTimeout(() => {
+                    notificationBell.classList.remove('has-notifications');
+                }, 1000);
+            } else {
+                notificationBadge.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching notification count:', error);
+        });
+}
+
+function toggleNotifications(event) {
+    event.preventDefault();
+    const dropdown = document.getElementById('notification-dropdown');
+    modalOpen = !modalOpen;
+    
+    if (modalOpen) {
+        dropdown.style.display = 'block';
+        lastSeenTimestamp = Math.floor(Date.now() / 1000);
+        
+        fetch('/notifications')
+            .then(response => response.json())
+            .then(data => {
+                if (data.notifications) {
+                    currentNotifications = data.notifications.map(n => ({
+                        ...n,
+                        status: 'unread'
+                    }));
+                    
+                    initialUnreadIds = new Set(
+                        currentNotifications
+                            .filter(n => n.status === 'unread')
+                            .map(n => n.id)
+                    );
+                    
+                    updateNotificationsDisplay();
+                    
+                    let csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    
+                    if (!csrfToken) {
+                        console.error('CSRF token not found in meta tag');
+                        return;
+                    }
+                    
+                    const formData = new FormData();
+                    formData.append('csrf_token', csrfToken);
+                    
+                    return fetch('/notifications/mark-read-all', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            currentNotifications.forEach(n => n.status = 'seen');
+                            const countElement = document.getElementById('notification-count');
+                            if (countElement) {
+                                countElement.style.display = 'none';
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Failed to mark notifications as read:', error);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching notifications:', error);
+            });
+    } else {
+        dropdown.style.display = 'none';
+        lastSeenTimestamp = 0;
+        initialUnreadIds.clear();
+    }
+}
+
+function updateNotificationsDisplay() {
+    const container = document.getElementById('notifications-container');
+    
+    if (currentNotifications.length === 0) {
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No notifications</div>';
+        return;
+    }
+    
+    let html = '';
+    currentNotifications.forEach(notification => {
+        const isHighlighted = initialUnreadIds.has(notification.id);
+        html += `
+            <div class="${isHighlighted ? 'notification-highlight' : ''}" onclick="markNotificationRead(${notification.id})">
+                <div class="notification-message">
+                    <strong>${notification.title}</strong><br>
+                    ${notification.message}<br>
+                    <small style="color: #666;">${notification.created_at}</small>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function markNotificationRead(notificationId) {
+    let csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    
+    if (!csrfToken) {
+        console.error('CSRF token not found in meta tag');
+        return;
+    }
+    
+    sendNotificationRequest(notificationId, csrfToken);
+}
+
+function sendNotificationRequest(notificationId, csrfToken) {
+    const formData = new FormData();
+    formData.append('csrf_token', csrfToken);
+    
+    fetch(`/notifications/mark-read/${notificationId}`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            currentNotifications = currentNotifications.filter(n => n.id !== notificationId);
+            updateNotificationsDisplay();
+            updateNotifications();
+        } else {
+            console.error('Notification mark failed:', data);
+        }
+    })
+    .catch(error => {
+        console.error('Error marking notification as read:', error);
+    });
+}
+
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('notification-dropdown');
+    const notificationIcon = document.querySelector('.notification-icon');
+    
+    if (modalOpen && !dropdown.contains(event.target) && !notificationIcon.contains(event.target)) {
+        modalOpen = false;
+        dropdown.style.display = 'none';
+        lastSeenTimestamp = 0;
+        initialUnreadIds.clear();
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const notificationBell = document.querySelector('.notification-bell');
+    if (notificationBell) {
+        notificationBell.addEventListener('click', toggleNotifications);
+    }
+});
+
+updateOnlineCount();
+updateNotifications();
+
+setInterval(updateOnlineCount, 30000);
+setInterval(updateNotifications, 30000);
+</script>
+
+<button class="chat-toggle" onclick="toggleChat()">Chat</button>
+
+<div class="chat-container hidden" id="chat-container">
+    <div class="chat-header">
+        <span>Chat</span>
+        <button class="chat-close" onclick="toggleChat()">&times;</button>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+    </div>
+    <div class="chat-input-container">
+        <input type="text" class="chat-input" id="chat-input" placeholder="{% if username %}Type your message...{% else %}You must login to send messages{% endif %}" onkeypress="handleChatKeyPress(event)" autocomplete="off" {% if not username %}disabled{% endif %}>
+        <button class="chat-send-btn" onclick="sendChatMessage()" {% if not username %}disabled{% endif %}>Send</button>
+    </div>
+</div>
+
+<div id="chatSettingsModal" class="chat-msg-modal">
+    <div class="chat-msg-modal-content" style="max-width: 300px;">
+        <h3 style="color: #fff; margin: 0 0 20px 0; font-size: 16px;">Chat Settings</h3>
+        <div class="chat-msg-button-container" style="gap: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #fff;">Show Chat</span>
+                <label class="switch">
+                    <input type="checkbox" id="showChatToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #fff;">Enable Chat</span>
+                <label class="switch">
+                    <input type="checkbox" id="chatEnabledToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #fff;">Allow Anonymous</span>
+                <label class="switch">
+                    <input type="checkbox" id="allowAnonymousToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="chat-msg-modal" id="chatMessageModal" onclick="closeMessageModal(event)">
+    <div class="chat-msg-modal-content">
+        <div id="chat-msg-info"></div>
+                    <div class="chat-msg-button-container">
+                <button id="chatDeleteMessageBtn" class="chat-msg-button" onclick="deleteSelectedMessage()" style="display: none;">Delete</button>
+                <button id="chatVisitProfileBtn" class="chat-msg-button" onclick="visitProfile()" style="display: none;"></button>
+                <button id="chatCopyMessageIdBtn" class="chat-msg-button" onclick="copyMessageId(this.dataset.messageId)" style="display: none;">Copy Message ID</button>
+            </div>
+    </div>
+</div>
+
+<script>
+let chatMessages = [];
+let chatSocket = null;
+let chatConnected = false;
+let lastMessageId = 0;
+
+function toggleChat() {
+    const container = document.getElementById('chat-container');
+    const toggle = document.querySelector('.chat-toggle');
+    
+    if (container.classList.contains('hidden')) {
+        container.classList.remove('hidden');
+        toggle.textContent = 'Hide Chat';
+        connectChat();
+    } else {
+        container.classList.add('hidden');
+        toggle.textContent = 'Chat';
+        disconnectChat();
+    }
+}
+
+function connectChat() {
+    if (chatConnected) return;
+    
+    chatConnected = true;
+    loadChatMessages();
+    setInterval(loadChatMessages, 1000);
+}
+
+function disconnectChat() {
+    chatConnected = false;
+}
+
+function loadChatMessages() {
+    fetch('/chat/messages')
+        .then(response => response.json())
+        .then(data => {
+            if (data.messages) {
+                chatMessages = data.messages;
+                displayChatMessages();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading chat messages:', error);
+        });
+}
+
+    function displayChatMessages() {
+        const container = document.getElementById('chat-messages');
+        let html = '';
+        
+        chatMessages.forEach(message => {
+            const timeStr = new Date(message.timestamp).toUTCString().split(' ')[4].substring(0, 5);
+            
+            let usernameDisplay = '';
+            if (message.author === 'Anonymous') {
+                usernameDisplay = `<span style="color: #87CEEB;">${message.author}:</span>`;
+            } else {
+                const statusGif = message.status_gif ? `<img src="${message.status_gif}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">` : '';
+                const statusText = message.status_text ? ` <span style="color: ${message.status_color}; font-size: 12px;">[${message.status_text}]</span>` : '';
+                usernameDisplay = `<span style="position: relative; display: inline-block; padding: 2px;">${statusGif}<span style="color: ${message.author_color || '#87CEEB'};">${message.author}</span>${statusText}:</span>`;
+            }
+            
+            html += `
+                <div class="message" onclick="showMessageInfo('${message.id}')">
+                    <span class="chat-timestamp" style="color: #888; font-size: 12px; margin-right: 5px;">${timeStr} UTC</span>
+                    ${usernameDisplay}
+                    <span class="content">${escapeHtml(message.content)}</span>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function sendChatMessage() {
+        const input = document.getElementById('chat-input');
+        const message = input.value.trim();
+        
+        if (!message) return;
+        
+        if (input.disabled) {
+            alert('You must be logged in to send messages');
+            return;
+        }
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        
+        fetch('/chat/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                message: message
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                input.value = '';
+                loadChatMessages();
+            } else {
+                alert('Failed to send message: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error sending message:', error);
+            alert('Failed to send message');
+        });
+    }
+
+function handleChatKeyPress(event) {
+    if (event.key === 'Enter') {
+        const input = document.getElementById('chat-input');
+        if (input.disabled) {
+            event.preventDefault();
+            alert('You must be logged in to send messages');
+            return;
+        }
+        sendChatMessage();
+    }
+}
+
+        function showMessageInfo(messageId) {
+        const message = chatMessages.find(m => m.id === messageId);
+        if (!message) return;
+        
+        const modal = document.getElementById('chatMessageModal');
+        const info = document.getElementById('chat-msg-info');
+        const deleteBtn = document.getElementById('chatDeleteMessageBtn');
+        const visitBtn = document.getElementById('chatVisitProfileBtn');
+        const copyBtn = document.getElementById('chatCopyMessageIdBtn');
+        
+        const statusInfo = message.status_text ? `<br><strong>Status:</strong> <span style="color: ${message.status_color};">${message.status_text}</span>` : '';
+        
+        const timeStr = new Date(message.timestamp).toUTCString().split(' ')[4].substring(0, 5);
+        
+        let usernameDisplay = '';
+        if (message.author === 'Anonymous') {
+            usernameDisplay = `<span style="color: #87CEEB;">${message.author}:</span>`;
+        } else {
+            const statusGif = message.status_gif ? `<img src="${message.status_gif}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">` : '';
+            const statusText = message.status_text ? ` <span style="color: ${message.status_color}; font-size: 12px;">[${message.status_text}]</span>` : '';
+            usernameDisplay = `<span style="position: relative; display: inline-block; padding: 2px;">${statusGif}<span style="color: ${message.author_color || '#87CEEB'};">${message.author}</span>${statusText}:</span>`;
+        }
+        
+        info.innerHTML = `
+            <div style="margin-bottom: 10px;">
+                <span style="color: #fff;">${timeStr} UTC</span>
+                <span style="margin-left: 5px;">${usernameDisplay}</span>
+            </div>
+            <div style="color: #fff;">${escapeHtml(message.content)}</div>
+        `;
+        
+        const userStatus = '{{ user_status }}' || 'user';
+        const isAdmin = ['root', 'admin', 'manager', 'mod'].includes(userStatus);
+        const isOwnMessage = message.author === '{{ username }}';
+        
+        deleteBtn.style.display = isAdmin || isOwnMessage ? 'block' : 'none';
+        visitBtn.style.display = 'block';
+        copyBtn.style.display = 'block';
+        
+        if (visitBtn.style.display !== 'none') {
+            visitBtn.textContent = `Visit ${escapeHtml(message.author)}'s Profile`;
+        }
+        
+        copyBtn.dataset.messageId = message.id;
+        
+        window.currentChatMessage = message;
+        
+        modal.classList.add('show');
+    }
+
+    function closeMessageModal(event) {
+        if (event.target.id === 'chatMessageModal') {
+            const modal = document.getElementById('chatMessageModal');
+            modal.classList.remove('show');
+        }
+    }
+
+    function deleteSelectedMessage() {
+        if (!window.currentChatMessage) return;
+        
+        if (confirm('Are you sure you want to delete this message?')) {
+            const messageId = window.currentChatMessage.id;
+            
+            fetch(`/chat/delete/${messageId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    chatMessages = chatMessages.filter(m => m.id !== messageId);
+                    displayChatMessages();
+                    
+                    const modal = document.getElementById('chatMessageModal');
+                    modal.classList.remove('show');
+                    
+                    alert('Message deleted successfully!');
+                } else {
+                    alert('Failed to delete message: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting message:', error);
+                alert('Failed to delete message');
+            });
+        }
+    }
+
+    function visitProfile() {
+        if (!window.currentChatMessage) return;
+        
+        const username = window.currentChatMessage.author;
+        if (username && username !== 'Anonymous') {
+            window.open(`/user/${username}`, '_blank');
+        } else if (username === 'Anonymous') {
+            alert('Cannot visit profile for anonymous users');
+        }
+    }
+
+    function copyMessageId(messageId) {
+        navigator.clipboard.writeText(messageId).then(() => {
+            alert('Message ID copied to clipboard!');
+        }).catch(() => {
+            alert('Failed to copy message ID');
+        });
+    }
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+    document.addEventListener('click', function(event) {
+        const modal = document.getElementById('chatMessageModal');
+        if (event.target === modal) {
+            closeMessageModal(event);
+        }
+    });
+</script>
+
+{% block bottom %}
+{% endblock %}

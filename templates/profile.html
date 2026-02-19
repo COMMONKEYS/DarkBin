@@ -1,0 +1,1543 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="en" style="min-height: 100%;">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ login }}'s Profile | Rarbin</title>
+    <link rel="stylesheet" href="/static/legacy/index.css">
+    <link rel="stylesheet" href="/static/files/dropdown.css">
+    <link rel="stylesheet" href="/static/files/bootstrap.min.js">
+    <link rel="stylesheet" href="/static/files/doxbin.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <link rel="canonical" href="https://rarbin.com/profile/{{ login }}"/>
+    {% if music %}
+    <audio id="visitAudio" preload="auto" loop src="{{ url_for('static', filename='files/music/' + music) }}?v={{ get_cache_busting_version('files/music/' + music) }}" type="audio/mpeg"></audio>
+    {% endif %}
+</head>
+    <style>
+        .comment-text a {
+            text-decoration: none;
+        }
+        
+        .comment-text a:hover {
+            text-decoration: underline;
+        }
+        
+        .comment-text a:not([data-status]) {
+            color: #2A9FD6 !important;
+        }
+        
+        .comment-text a:not([data-status]):hover {
+            text-decoration-color: #2A9FD6;
+        }
+        
+        .comment-text a[data-status="founder"]:hover {
+            text-decoration-color: #ffaa00;
+        }
+        
+        .comment-text a[data-status="admin"]:hover {
+            text-decoration-color: #ff4444;
+        }
+        
+        .comment-text a[data-status="manager"]:hover {
+            text-decoration-color: #bb71e4;
+        }
+        
+        .comment-text a[data-status="mod"]:hover {
+            text-decoration-color: #39ff14;
+        }
+        
+        .comment-text a[data-status="council"]:hover {
+            text-decoration-color: #87cefa;
+        }
+        
+        .comment-text a[data-status="helper"]:hover {
+            text-decoration-color: #5555ff;
+        }
+        
+        .comment-text a[data-status="clique"]:hover {
+            text-decoration-color: #095699;
+        }
+        
+        .comment-text a[data-status="rich"]:hover {
+            text-decoration-color: #ffd700;
+        }
+        
+        .comment-text a[data-status="criminal"]:hover {
+            text-decoration-color: #780a48;
+        }
+        
+        .comment-text a[data-status="vip"]:hover {
+            text-decoration-color: #9b318e;
+        }
+        
+        .main-container {
+            max-width: 1000px;
+            margin: 40px auto 20px auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .profile-header {
+            background: #060606;
+            border: 1px solid #282828;
+            border-radius: 3px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .profile-header.has-banner {
+            background: transparent;
+            border: 1px solid #282828;
+            padding: 20px;
+        }
+        
+        .banner-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        
+        .profile-banner-bg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .banner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+        
+        .avatar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+        }
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 3px;
+            overflow: hidden;
+            flex-shrink: 0;
+            margin-bottom: 10px;
+            aspect-ratio: 1/1;
+        }
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            aspect-ratio: 1/1;
+        }
+        .profile-info {
+            flex-grow: 1;
+            position: relative;
+            z-index: 2;
+        }
+        .profile-header-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 0;
+        }
+        .profile-name-container {
+            display: flex;
+            flex-direction: column;
+        }
+        .profile-name {
+            font-size: 20px;
+            color: #fff;
+            font-weight: bold;
+            margin: 0;
+            line-height: 1;
+        }
+        .profile-bio {
+            color: #fff;
+            font-size: 15px;
+            margin: 4px 0;
+            padding-right: 20px;
+        }
+        .profile-bio a {
+            color: #ff0000;
+            text-decoration: none;
+        }
+        .profile-bio a:hover {
+            text-decoration: underline;
+        }
+        .follow-stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 4px;
+        }
+        .follow-stat {
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .follow-stat:hover {
+            color: #ccc;
+        }
+        .follow-count {
+            font-weight: bold;
+            margin-right: 2px;
+        }
+        .follow-label {
+            color: #666;
+        }
+        .content-section {
+            background: #060606;
+            border: 1px solid #282828;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+        
+
+        .section-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #282828;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .section-content {
+            padding: 15px 20px;
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #282828;
+            color: #fff;
+            font-size: 14px;
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        .data-table th {
+            text-align: left;
+            padding: 8px 20px;
+            color: #fff;
+            font-weight: bold;
+            background-color: #060606;
+            vertical-align: top;
+        }
+        .data-table th:nth-child(1) {
+            width: 50%;
+        }
+        .data-table th:nth-child(2),
+        .data-table th:nth-child(3),
+        .data-table th:nth-child(4) {
+            width: 16.67%;
+            text-align: center;
+        }
+        .data-table td {
+            padding: 12px 20px;
+            color: #fff;
+            border: none;
+            vertical-align: top;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .data-table td a {
+            display: block;
+            color: inherit;
+            text-decoration: none;
+            margin: -12px -20px;
+            padding: 12px 20px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        tr.paste-row td {
+            padding: 6px 20px;
+            font-size: 14px;
+        }
+        tr.paste-row td a {
+            margin: -6px -20px;
+            padding: 6px 20px;
+            font-size: 14px;
+        }
+        .data-table tr {
+            border-bottom: 1px solid #282828;
+        }
+        .data-table tr:last-child {
+            border-bottom: none;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .pagination-container {
+            padding: 15px 20px;
+            border-top: 1px solid #282828;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .results-count {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .pagination {
+            display: flex;
+            gap: 10px;
+        }
+        .page {
+            color: #fff;
+            text-decoration: none;
+            padding: 6px 12px;
+            border: 1px solid #222;
+            border-radius: 3px;
+            background: #060606;
+            cursor: pointer;
+        }
+        .page:hover {
+            background: #111;
+            border-color: #333;
+        }
+        .page[disabled] {
+            display: none;
+        }
+        .follow-button {
+            background: #060606;
+            color: #fff;
+            border: 1px solid #282828;
+            border-radius: 3px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            height: 32px;
+            line-height: 1;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 3;
+            text-decoration: none;
+        }
+        .follow-button:hover {
+            background: #111;
+            border-color: #333;
+            color: #fff;
+            text-decoration: none;
+        }
+        .follow-button.following {
+            background: #060606;
+            border-color: #282828;
+        }
+        .follow-button.following:hover {
+            background: #111;
+            border-color: #282828;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 2px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+        }
+
+        #followModal .modal-content {
+            background: #060606;
+            border: 1px solid #282828;
+            width: 95%;
+            max-width: 600px;
+            height: auto;
+            max-height: 90vh;
+            margin: 50px auto;
+            padding: 0;
+            position: relative;
+        }
+
+        #followModal .modal-user-list {
+            max-height: calc(90vh - 20px);
+            overflow-y: auto;
+        }
+
+        #followModal #searchInput {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #060606;
+            border: 1px solid #282828;
+            border-radius: 0;
+            color: #fff;
+            font-size: 14px;
+            padding: 15px 20px;
+            width: 100%;
+            box-sizing: border-box;
+            margin: 0;
+        }
+
+        #followModal #searchInput:focus {
+            outline: none;
+            border-color: #444;
+            background: #0a0a0a;
+        }
+
+        .user-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid #111;
+            transition: background 0.1s;
+        }
+
+        .user-item:hover {
+            background: #0a0a0a;
+        }
+
+        .user-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-name {
+            color: #fff;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        #followModal .modal-user-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #followModal .modal-user-list::-webkit-scrollbar-track {
+            background: #060606;
+        }
+
+        #followModal .modal-user-list::-webkit-scrollbar-thumb {
+            background: #282828;
+            border-radius: 0;
+        }
+
+        #followModal .modal-user-list::-webkit-scrollbar-thumb:hover {
+            background: #333;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 0 10px;
+                margin: 10px auto;
+            }
+            .profile-header {
+                padding: 15px;
+                display: flex;
+                flex-direction: row;
+                align-items: flex-start;
+                text-align: left;
+            }
+            .avatar-container {
+                gap: 4px;
+                display: flex;
+                flex-direction: column;
+            }
+            .profile-avatar {
+                width: 90px;
+                height: 90px;
+                margin-bottom: 0;
+                aspect-ratio: 1/1;
+            }
+            .profile-avatar img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                aspect-ratio: 1/1;
+            }
+            .profile-info {
+                flex-grow: 1;
+                padding-right: 15px;
+            }
+            .profile-header-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+            .profile-name-container {
+                flex: 1;
+                min-width: 0;
+                width: 100%;
+            }
+            .profile-name {
+                font-size: 20px;
+                line-height: 1.2;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .profile-bio {
+                font-size: 13px;
+                padding-right: 0;
+                margin: 4px 0 8px 0;
+            }
+            .follow-button {
+                position: static;
+                width: 90px;
+                margin-top: 4px;
+                font-size: 12px;
+                padding: 0 8px;
+            }
+            .follow-button.edit-desktop {
+                display: none;
+            }
+            .follow-button.edit-mobile {
+                display: block;
+            }
+            .follow-stats {
+                justify-content: flex-start;
+                gap: 15px;
+            }
+            .follow-stat {
+                font-size: 12px;
+            }
+            .table-wrapper {
+                margin: 0;
+            }
+            .data-table {
+                font-size: 12px;
+                table-layout: fixed;
+            }
+            .data-table th,
+            .data-table td {
+                padding: 8px;
+                vertical-align: top;
+            }
+            .data-table th:nth-child(1) {
+                width: 60%;
+            }
+            .data-table th:nth-child(2) {
+                width: 40%;
+                text-align: center;
+            }
+            .data-table td a {
+                margin: -8px;
+                padding: 8px;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+            }
+            .data-table th:nth-child(3),
+            .data-table td:nth-child(3),
+            .data-table th:nth-child(4),
+            .data-table td:nth-child(4) {
+                display: none;
+            }
+        }
+        .edit-desktop {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .edit-desktop {
+                display: block;
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                z-index: 3;
+            }
+            .edit-mobile {
+                display: none;
+            }
+        }
+        
+        .comments-wrapper {
+            padding: 15px;
+        }
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .comments-list::-webkit-scrollbar {
+            display: block !important;
+            width: 16px;
+        }
+        .comments-list::-webkit-scrollbar-thumb {
+            background: #333;
+        }
+        .comments-list::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+        .comments-list::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        .comment-item {
+            padding: 8px;
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .comment-main {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 0;
+        }
+        .comment-author {
+            margin-right: 0;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .comment-author a {
+            color: inherit;
+            text-decoration: none;
+            background-repeat: repeat;
+            background-size: cover;
+            padding: 2px 8px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        .comment-author a:hover {
+            text-decoration: underline;
+        }
+		.comment-text {
+			display: flex;
+			align-items: flex-start;
+			gap: 0;
+			color: #ccc;
+			font-size: 13px;
+			word-break: break-word;
+			white-space: normal;
+		}
+		.comment-content {
+			color: #ccc;
+			font-size: 13px;
+			word-break: break-word;
+			white-space: normal;
+		}
+        .comment-date {
+            color: #fff;
+            font-size: 11px;
+            white-space: nowrap;
+            margin-left: 8px;
+        }
+        .comment-info {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .delete-comment-btn {
+            background: #060606;
+            border: 1px solid #282828;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .no-comments {
+            color: #666;
+            text-align: center;
+            padding: 15px;
+            font-size: 13px;
+        }
+        .hidden-comment {
+            background: rgba(255, 0, 0, 0.25);
+        }
+
+        .status-root { color: #ffaa00; }
+        .status-admin { color: #ff4444; }
+        .status-manager { color: #bb71e4; }
+        .status-mod { color: #39ff14; }
+        .status-council { color: #87cefa; }
+        .status-helper { color: #5555ff; }
+        .status-clique { color: #095699; }
+        .status-rich { color: #ffd700; }
+        .status-criminal { color: #780a48; }
+        .status-vip { color: #9b318e; }
+        .status-user { color: #2A9FD6; }
+
+        tr.status-root > td { background-color: #171105 !important; }
+        tr.status-admin > td { background-color: #3D0606 !important; }
+        tr.status-manager > td { background-color: #1A0D2B !important; }
+        tr.status-mod > td { background-color: #0F2D06 !important; }
+        tr.status-council > td { background-color: #1A3D5D !important; }
+        tr.status-helper > td { background-color: #0A0A33 !important; }
+        tr.status-clique > td { background-color: #031C34 !important; }
+        tr.status-rich > td { background-color: #2B200D !important; }
+        tr.status-criminal > td { background-color: #2B021B !important; }
+        tr.status-vip > td { background-color: #2D0A21 !important; }
+        tr.status-user > td { background-color: #060606 !important; }
+
+        .comment-form {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 3px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .comment-textarea {
+            width: 100%;
+            min-height: 80px;
+            background: #060606;
+            border: 1px solid #282828;
+            border-radius: 3px;
+            padding: 10px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+        }
+        .comment-textarea:focus {
+            outline: none;
+            border-color: #444;
+        }
+        .post-comment-btn {
+            background: #060606;
+            border: 1px solid #282828;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 3px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .post-comment-btn:hover {
+            background: #111;
+            border-color: #333;
+        }
+        .add-comment-btn {
+            background: #060606;
+            border: 1px solid #282828;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 3px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .add-comment-btn:hover {
+            background: #111;
+            border-color: #333;
+        }
+        
+        .follow-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+        }
+        
+        .follow-modal-content {
+            background: #060606;
+            border: 1px solid #282828;
+            width: 95%;
+            max-width: 500px;
+            height: auto;
+            max-height: 80vh;
+            margin: 120px auto 50px auto;
+            padding: 0;
+            position: relative;
+            border-radius: 3px;
+        }
+        
+        .follow-modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #282828;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .follow-search-container {
+            padding: 15px 20px;
+            border-bottom: 1px solid #282828;
+        }
+        
+        .follow-search-box {
+            background: #282828;
+            border: 1px solid #444;
+            outline: none;
+            color: white;
+            padding: 8px 12px;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        
+        .follow-search-box::placeholder {
+            color: #878787;
+        }
+        
+        .follow-search-box:focus {
+            border-color: #666;
+        }
+        
+        .follow-modal-title {
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .follow-modal-close {
+            color: #666;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            line-height: 1;
+        }
+        
+        .follow-modal-close:hover {
+            color: #fff;
+        }
+        
+        .follow-modal-body {
+            max-height: calc(80vh - 80px);
+            overflow-y: auto;
+        }
+        
+        .follow-user-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #282828;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .follow-user-item:last-child {
+            border-bottom: none;
+        }
+        
+        .follow-user-item:hover {
+            background: #0a0a0a;
+        }
+        
+        .follow-user-name {
+            color: #fff;
+            text-decoration: none;
+            font-size: 14px;
+            flex: 1;
+            background-repeat: repeat;
+            background-size: cover;
+            padding: 2px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            font-weight: bold;
+        }
+        
+        .follow-user-name:hover {
+            text-decoration: underline;
+        }
+        
+        .follow-date {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .follow-modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .follow-modal-body::-webkit-scrollbar-track {
+            background: #060606;
+        }
+        
+        .follow-modal-body::-webkit-scrollbar-thumb {
+            background: #282828;
+            border-radius: 0;
+        }
+        
+        .follow-modal-body::-webkit-scrollbar-thumb:hover {
+            background: #333;
+        }
+        
+        .no-follows {
+            color: #666;
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 14px;
+        }
+        
+
+    </style>
+    
+</head>
+
+<body class="bin" style="background-color: #060606;">
+<input type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() }}">
+</nav>
+    <div class="main-container">
+        <div class="profile-header{% if banner %} has-banner{% endif %}">
+            {% if banner %}
+            <div class="banner-background">
+                <img src="{{ url_for('static', filename='files/banners/' + banner) }}?v={{ get_cache_busting_version('files/banners/' + banner) }}" alt="Profile banner" class="profile-banner-bg">
+                <div class="banner-overlay"></div>
+            </div>
+            {% endif %}
+            
+            {% if username == login %}
+                <a href="{{ url_for('settings') }}" class="follow-button edit-desktop">Edit Profile</a>
+            {% elif username %}
+                {% if is_following %}
+                    <button type="button" class="follow-button following" onclick="toggleFollow('{{ login }}', false)">Following</button>
+                {% else %}
+                    <button type="button" class="follow-button" onclick="toggleFollow('{{ login }}', true)">Follow</button>
+                {% endif %}
+            {% endif %}
+            
+            <div class="avatar-container">
+                <div class="profile-avatar">
+                    {% if avatar %}
+                        <img src="{{ url_for('static', filename='files/pfp/' + avatar) }}?v={{ get_cache_busting_version('files/pfp/' + avatar) }}" alt="{{ login }}'s avatar">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='files/default.jpg') }}" alt="Default avatar">
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="profile-info">
+                <div class="profile-header-row">
+                    <div class="profile-name-container">
+                        {% if status == 'root' %}
+                            {% set custom_color = get_username_color(login) %}
+                            <h1 class="profile-name" style="display: inline-block; width: fit-content;">
+                                <span style="color: {{ custom_color or '#ffaa00' }};">{{ login }}</span> <span style="color: #ffaa00;">[Founder]</span>
+                            </h1>
+                        {% elif status == 'admin' %}
+                            {% set custom_color = get_username_color(login) %}
+                            <h1 class="profile-name" style="background-image: url('{{ url_for('static', filename='files/red.gif') }}'); background-repeat: repeat; background-size: cover; padding: 1px 6px; border-radius: 6px; display: inline-block; width: fit-content; margin-left: -6px; line-height: 1; margin-bottom: 0; vertical-align: top;">
+                                <span style="color: {{ custom_color or '#ff4444' }};">{{ login }}</span> <span style="color: #ff4444;">[Admin]</span>
+                            </h1>
+                        {% elif status == 'manager' %}
+                            {% set custom_color = get_username_color(login) %}
+                            <h1 class="profile-name" style="background-image: url('{{ url_for('static', filename='files/purple.gif') }}'); background-repeat: repeat; background-size: cover; padding: 1px 6px; border-radius: 6px; display: inline-block; width: fit-content; margin-left: -6px; line-height: 1; margin-bottom: 0; vertical-align: top;">
+                                <span style="color: {{ custom_color or '#bb71e4' }};">{{ login }}</span> <span style="color: #bb71e4;">[Manager]</span>
+                            </h1>
+                        {% elif status == 'mod' %}
+                            {% set custom_color = get_username_color(login) %}
+                            <h1 class="profile-name">
+                                <span style="color: {{ custom_color or '#39ff14' }};">{{ login }}</span> <span style="color: #39ff14;">[Mod]</span>
+                            </h1>
+                        {% elif status == 'council' %}
+                            {% set custom_color = get_username_color(login) %}
+                            <h1 class="profile-name">
+                                <span style="color: {{ custom_color or '#87cefa' }};">{{ login }}</span> <span style="color: #87cefa;">[Council]</span>
+                            </h1>
+                        {% elif status == 'helper' %}
+                            {% set custom_color = get_username_color(login) %}
+                            <h1 class="profile-name">
+                                <span style="color: {{ custom_color or '#5555ff' }};">{{ login }}</span> <span style="color: #5555ff;">[Helper]</span>
+                            </h1>
+                        {% elif status == 'clique' %}
+                            {% set custom_color = get_username_color(login) %}
+                            <h1 class="profile-name">
+                                <span style="color: {{ custom_color or '#095699' }};">{{ login }}</span> <span style="color: #095699;">[Clique]</span>
+                            </h1>
+                        {% elif status == 'rich' %}
+                            {% set custom_color = get_username_color(login) %}
+                            <h1 class="profile-name" style="background-image: url('{{ url_for('static', filename='files/gold.gif') }}'); background-repeat: repeat; background-size: cover; padding: 1px 6px; border-radius: 6px; display: inline-block; width: fit-content; margin-left: -6px; line-height: 1; margin-bottom: 0; vertical-align: top;">
+                                <span style="color: {{ custom_color or '#ffd700' }};">{{ login }}</span> <span style="color: #ffd700;">[Rich]</span>
+                            </h1>
+                        {% elif status == 'criminal' %}
+                            {% set custom_color = get_username_color(login) %}
+                            <h1 class="profile-name">
+                                <span style="color: {{ custom_color or '#780a48' }};">{{ login }}</span> <span style="color: #780a48;">[Criminal]</span>
+                            </h1>
+                        {% elif status == 'vip' %}
+                            {% set custom_color = get_username_color(login) %}
+                            <h1 class="profile-name">
+                                <span style="color: {{ custom_color or '#9b318e' }};">{{ login }}</span> <span style="color: #9b318e;">[VIP]</span>
+                            </h1>
+                        {% elif status == 'user' %}
+                            {% set custom_color = get_username_color(login) %}
+                            <h1 class="profile-name">
+                                <span style="color: {{ custom_color or '#2A9FD6' }};">{{ login }}</span>
+                            </h1>
+                        {% endif %}
+
+                        {% if bio %}
+                            <div class="profile-bio" {% if account_locked %}style="color: #ff4444; font-weight: bold;"{% endif %}>{{ bio }}</div>
+                        {% endif %}
+
+                                                <div class="follow-stats">
+                            <div class="follow-stat" onclick="showFollowers('{{ login }}')">
+                                <span class="follow-count">{{ followers_count }}</span>
+                                <span class="follow-label">followers</span>
+                            </div>
+                            <div class="follow-stat" onclick="showFollowing('{{ login }}')">
+                                <span class="follow-count">{{ following_count }}</span>
+                                <span class="follow-label">following</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if username == login %}
+                <a href="{{ url_for('settings') }}" class="follow-button edit-mobile">Edit Profile</a>
+            {% elif username %}
+                {% if is_following %}
+                    <button type="button" class="follow-button following edit-mobile" onclick="toggleFollow('{{ login }}', false)">Following</button>
+                {% else %}
+                    <button type="button" class="follow-button edit-mobile" onclick="toggleFollow('{{ login }}', true)">Follow</button>
+                {% endif %}
+            {% endif %}
+        </div>
+
+
+
+        <div class="content-section">
+            <div class="section-header">Information</div>
+            <div class="section-content">
+                <div class="info-row">
+                    <span>User ID</span>
+                    <span>{{ userid }}</span>
+                </div>
+                <div class="info-row">
+                    <span>Joined</span>
+                    <span>{{ joined|naturaltime }}</span>
+                </div>
+                <div class="info-row">
+                    <span>Pastes</span>
+                    <span>{{ paste_count }}</span>
+                </div>
+                <div class="info-row">
+                    <span>Followers</span>
+                    <span>{{ followers_count }}</span>
+                </div>
+                <div class="info-row">
+                    <span>Following</span>
+                    <span>{{ following_count }}</span>
+                </div>
+                <div class="info-row">
+                    <span>Comments</span>
+                    <span>{{ comment_count }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <div class="section-header">{{ login }}'s Pastes</div>
+            <div class="section-content">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th class="text-center">Comments</th>
+                            <th class="text-center">Views</th>
+                            <th class="text-center r-hide">Added</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for paste in pastes %}
+                            <tr class="paste-row status-{{ status|lower }}">
+                                <td>
+                                    <a href="{{ url_for('post', file=paste[7] if paste[7] else paste[2]) }}" title="{{ paste[2] }}">
+                                        {% if paste[6] == 'True' %}<img src="{{ url_for('static', filename='files/pin.svg') }}" alt="Pinned" style="margin-right: 8px; width: 16px; height: 16px; vertical-align: middle; filter: invert(1);">{% endif %}{{ paste[2] }}
+                                    </a>
+                                </td>
+                                <td class="text-center">
+                                    {{ paste_comments_count[paste[0]] if paste[0] in paste_comments_count else 0 }}
+                                </td>
+                                <td class="text-center">
+                                    {{ paste[5] }}
+                                </td>
+                                <td class="text-center r-hide">
+                                    {{ (paste[3] ~ ' ' ~ paste[4])|naturaltime }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <div class="section-header">
+                Profile Comments
+                {% if username %}
+                    <button type="button" class="add-comment-btn" id="addCommentBtn" style="float: right; margin-top: -8px;">Add Comment</button>
+                {% endif %}
+            </div>
+            
+            {% if username %}
+            <div class="comment-form" id="profile-comment-form" style="display: none;">
+                <form action="{{ url_for('add_profile_comment', username=login) }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <textarea
+                        name="comment"
+                        placeholder="Write a comment on {{ login }}'s profile..."
+                        maxlength="90"
+                        required
+                        class="comment-textarea"
+                    ></textarea>
+                    <div class="g-recaptcha" data-theme="dark" data-sitekey="6LfkGncrAAAAACAFCgbfJzEZQt8XIr69KTXWSIVp" style="margin: 10px 0;"></div>
+                    <button type="submit" class="post-comment-btn">Post Comment</button>
+                </form>
+            </div>
+            {% endif %}
+
+            <div class="comments-wrapper">
+                <div class="comments-list">
+                    {% if profile_comments %}
+                        {% for comment in profile_comments %}
+                        <div class="comment-item">
+                            <div class="comment-main">
+                                <div class="comment-text">
+                                    {% if comment.loginstatus == 'root' %}
+                                        {% set custom_color = get_username_color(comment.commenter_username) %}
+                                        <a href="{{ url_for('user', username=comment.commenter_username) }}" data-status="founder">
+                                            <span style="color: {{ custom_color or '#ffaa00' }};">{{ comment.commenter_username }}</span><span style="color: #ffaa00;">&nbsp;[Founder]</span><span style="color: #ffaa00;">:</span>
+                                        </a>
+                                    {% elif comment.loginstatus == 'admin' %}
+                                        {% set custom_color = get_username_color(comment.commenter_username) %}
+                                                                                    <a href="{{ url_for('user', username=comment.commenter_username) }}" data-status="admin">
+                                                <span style="background-image: url('{{ url_for('static', filename='files/red.gif') }}'); background-repeat: repeat; background-size: cover; padding: 0; border-radius: 0;">
+                                                    <span style="color: {{ custom_color or '#ff4444' }};">{{ comment.commenter_username }}</span><span style="color: #ff4444;">&nbsp;[Admin]</span><span style="color: #ff4444;">:</span>
+                                                </span>
+                                            </a>
+                                    {% elif comment.loginstatus == 'manager' %}
+                                        {% set custom_color = get_username_color(comment.commenter_username) %}
+                                                                                    <a href="{{ url_for('user', username=comment.commenter_username) }}" data-status="manager">
+                                                <span style="background-image: url('{{ url_for('static', filename='files/purple.gif') }}'); background-repeat: repeat; background-size: cover; padding: 0; border-radius: 0;">
+                                                    <span style="color: {{ custom_color or '#bb71e4' }};">{{ comment.commenter_username }}</span><span style="color: #bb71e4;">&nbsp;[Manager]</span><span style="color: #bb71e4;">:</span>
+                                                </span>
+                                            </a>
+                                    {% elif comment.loginstatus == 'mod' %}
+                                        {% set custom_color = get_username_color(comment.commenter_username) %}
+                                        <a href="{{ url_for('user', username=comment.commenter_username) }}" data-status="mod">
+                                            <span style="color: {{ custom_color or '#39ff14' }};">{{ comment.commenter_username }}</span><span style="color: #39ff14;">&nbsp;[Mod]</span><span style="color: #39ff14;">:</span>
+                                        </a>
+                                    {% elif comment.loginstatus == 'council' %}
+                                        {% set custom_color = get_username_color(comment.commenter_username) %}
+                                        <a href="{{ url_for('user', username=comment.commenter_username) }}" data-status="council">
+                                            <span style="color: {{ custom_color or '#87cefa' }};">{{ comment.commenter_username }}</span><span style="color: #87cefa;">&nbsp;[Council]</span><span style="color: #87cefa;">:</span>
+                                        </a>
+                                    {% elif comment.loginstatus == 'helper' %}
+                                        {% set custom_color = get_username_color(comment.commenter_username) %}
+                                        <a href="{{ url_for('user', username=comment.commenter_username) }}" data-status="helper">
+                                            <span style="color: {{ custom_color or '#5555ff' }};">{{ comment.commenter_username }}</span><span style="color: #5555ff;">&nbsp;[Helper]</span><span style="color: #5555ff;">:</span>
+                                        </a>
+                                    {% elif comment.loginstatus == 'clique' %}
+                                        {% set custom_color = get_username_color(comment.commenter_username) %}
+                                        <a href="{{ url_for('user', username=comment.commenter_username) }}" data-status="clique">
+                                            <span style="color: {{ custom_color or '#095699' }};">{{ comment.commenter_username }}</span><span style="color: #095699;">&nbsp;[Clique]</span><span style="color: #095699;">:</span>
+                                        </a>
+                                    {% elif comment.loginstatus == 'rich' %}
+                                        {% set custom_color = get_username_color(comment.commenter_username) %}
+                                                                                    <a href="{{ url_for('user', username=comment.commenter_username) }}" data-status="rich">
+                                                <span style="background-image: url('{{ url_for('static', filename='files/gold.gif') }}'); background-repeat: repeat; background-size: cover; padding: 0; border-radius: 0;">
+                                                    <span style="color: {{ custom_color or '#ffd700' }};">{{ comment.commenter_username }}</span><span style="color:#ffd700;">&nbsp;[Rich]</span><span style="color:#ffd700;">:</span>
+                                                </span>
+                                            </a>
+                                    {% elif comment.loginstatus == 'criminal' %}
+                                        {% set custom_color = get_username_color(comment.commenter_username) %}
+                                        <a href="{{ url_for('user', username=comment.commenter_username) }}" data-status="criminal">
+                                            <span style="color: {{ custom_color or '#780a48' }};">{{ comment.commenter_username }}</span><span style="color: #780a48;">&nbsp;[Criminal]</span><span style="color: #780a48;">:</span>
+                                        </a>
+                                    {% elif comment.loginstatus == 'vip' %}
+                                        {% set custom_color = get_username_color(comment.commenter_username) %}
+                                        <a href="{{ url_for('user', username=comment.commenter_username) }}" data-status="vip">
+                                            <span style="color: {{ custom_color or '#9b318e' }};">{{ comment.commenter_username }}</span><span style="color: #9b318e;">&nbsp;[VIP]</span><span style="color: #9b318e;">:</span>
+                                        </a>
+                                    {% elif comment.loginstatus == 'user' %}
+                                        {% set custom_color = get_username_color(comment.commenter_username) %}
+                                        <a href="{{ url_for('user', username=comment.commenter_username) }}">
+                                            <span style="color: #2A9FD6;">{{ comment.commenter_username }}</span><span style="color: #2A9FD6;">:</span>
+                                        </a>
+                                    {% else %}
+                                        {% set custom_color = get_username_color(comment.commenter_username) %}
+                                        <a href="{{ url_for('user', username=comment.commenter_username) }}">
+                                            <span style="color: #2A9FD6;">{{ comment.commenter_username }}</span><span style="color: #2A9FD6;">:</span>
+                                        </a>
+                                    {% endif %}
+                                    <span class="comment-content">&nbsp;{{ comment.comment|linkify|safe }}</span>
+                                </div>
+                            </div>
+                            <div class="comment-date">
+                                {{ comment.date|comment_naturaltime }}
+                                {% if username == login %}
+                                    <a href="{{ url_for('delete_profile_comment', username=login, comment_id=comment.id) }}"
+                                       class="delete-comment-btn"
+                                       onclick="return confirm('Are you sure you want to delete this comment?')"
+                                       style="margin-left: 8px;">
+                                        <i class="material-icons" style="font-size: 11px;">delete</i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-comments">
+                            No comments yet. Be the first to comment on {{ login }}'s profile!
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+    <div id="followModal" class="follow-modal">
+        <div class="follow-modal-content">
+            <div class="follow-modal-header">
+                <h3 class="follow-modal-title" id="followModalTitle">Followers</h3>
+                <button class="follow-modal-close" onclick="closeFollowModal()">&times;</button>
+            </div>
+            <div class="follow-search-container">
+                <input type="text" id="followSearchBox" class="follow-search-box" placeholder="Search users..." onkeyup="filterFollowUsers()" autocomplete="off">
+            </div>
+            <div class="follow-modal-body" id="followModalBody">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var addCommentBtn = document.getElementById('addCommentBtn');
+            if (addCommentBtn) {
+                addCommentBtn.addEventListener('click', function() {
+                    var form = document.getElementById('profile-comment-form');
+                    if (form.style.display === 'none' || form.style.display === '') {
+                        form.style.display = 'block';
+                        addCommentBtn.textContent = 'Cancel';
+                    } else {
+                        form.style.display = 'none';
+                        addCommentBtn.textContent = 'Add Comment';
+                    }
+                });
+            }
+            
+            {% if music %}
+            window.addEventListener("load", () => {
+                const audio = document.getElementById("visitAudio");
+                if (!audio) return;
+                audio.volume = 0.1;
+                const playAudio = () => {
+                    audio.play().catch(() => {
+                        window.addEventListener('click', playAudio, { once: true });
+                        window.addEventListener('touchstart', playAudio, { once: true });
+                    });
+                };
+                playAudio();
+                audio.addEventListener('error', () => console.log("Error loading audio: {{ url_for('static', filename='files/music/' + music) }}"));
+            });
+            {% endif %}
+        });
+
+        function showFollowers(username) {
+            fetch(`/followers/${username}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Error loading followers: ' + data.error);
+                        return;
+                    }
+                    
+                    const modal = document.getElementById('followModal');
+                    const title = document.getElementById('followModalTitle');
+                    const searchBox = document.getElementById('followSearchBox');
+                    
+                    title.textContent = 'Followers';
+                    modal.style.display = 'block';
+                    searchBox.value = '';
+                    
+                    currentFollowers = data.followers;
+                    currentModalType = 'followers';
+                    
+                    displayUserList(data.followers, 'followers');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error loading followers');
+                });
+        }
+
+        function showFollowing(username) {
+            fetch(`/following/${username}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Error loading following: ' + data.error);
+                        return;
+                    }
+                    
+                    const modal = document.getElementById('followModal');
+                    const title = document.getElementById('followModalTitle');
+                    const searchBox = document.getElementById('followSearchBox');
+                    
+                    title.textContent = 'Following';
+                    modal.style.display = 'block';
+                    searchBox.value = '';
+                    
+                    currentFollowing = data.following;
+                    currentModalType = 'following';
+                    
+                    displayUserList(data.following, 'following');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error loading following');
+                });
+        }
+
+        function closeFollowModal() {
+            document.getElementById('followModal').style.display = 'none';
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                'root': '#ffaa00',
+                'admin': '#ff4444',
+                'manager': '#bb71e4',
+                'mod': '#39ff14',
+                'council': '#87cefa',
+                'helper': '#5555ff',
+                'clique': '#095699',
+                'rich': '#ffd700',
+                'criminal': '#780a48',
+                'vip': '#9b318e',
+                'user': '#2A9FD6'
+            };
+            return colors[status] || '#2A9FD6';
+        }
+
+        function getStatusBackground(status) {
+            const backgrounds = {
+                'admin': 'url("/static/files/red.gif")',
+                'manager': 'url("/static/files/purple.gif")',
+                'rich': 'url("/static/files/gold.gif")'
+            };
+            return backgrounds[status] || 'none';
+        }
+
+
+
+        function getStatusText(status) {
+            const texts = {
+                'root': '[Founder]',
+                'admin': '[Admin]',
+                'manager': '[Manager]',
+                'mod': '[Mod]',
+                'council': '[Council]',
+                'helper': '[Helper]',
+                'clique': '[Clique]',
+                'rich': '[Rich]',
+                'criminal': '[Criminal]',
+                'vip': '[VIP]'
+            };
+            return texts[status] || '';
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+            const now = new Date();
+            const diffMs = now - date;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) {
+                return 'Today';
+            } else if (diffDays === 1) {
+                return 'Yesterday';
+            } else if (diffDays < 7) {
+                return `${diffDays} days ago`;
+            } else if (diffDays < 30) {
+                const weeks = Math.floor(diffDays / 7);
+                return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
+            } else if (diffDays < 365) {
+                const months = Math.floor(diffDays / 30);
+                return `${months} month${months > 1 ? 's' : ''} ago`;
+            } else {
+                const years = Math.floor(diffDays / 365);
+                return `${years} year${years > 1 ? 's' : ''} ago`;
+            }
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('followModal');
+            if (event.target === modal) {
+                closeFollowModal();
+            }
+        }
+
+        let currentFollowers = [];
+        let currentFollowing = [];
+        let currentModalType = '';
+
+        function toggleFollow(username, follow) {
+            const button = event.target;
+            const originalText = button.textContent;
+            const isFollowing = button.classList.contains('following');
+            
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner"></span>';
+            
+            const url = follow ? `/follow/${username}` : `/unfollow/${username}`;
+            const method = 'POST';
+            
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.getElementById('csrf_token').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (follow) {
+                        button.classList.add('following');
+                        button.textContent = 'Following';
+                        button.onclick = () => toggleFollow(username, false);
+                    } else {
+                        button.classList.remove('following');
+                        button.textContent = 'Follow';
+                        button.onclick = () => toggleFollow(username, true);
+                    }
+                    
+                    const followerCountElement = document.querySelector('.follow-stat .follow-count');
+                    if (followerCountElement) {
+                        const currentCount = parseInt(followerCountElement.textContent);
+                        const newCount = follow ? currentCount + 1 : Math.max(0, currentCount - 1);
+                        followerCountElement.textContent = newCount;
+                    }
+                } else {
+                    alert(data.error || 'An error occurred');
+                    button.textContent = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing your request');
+                button.textContent = originalText;
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+
+        function filterFollowUsers() {
+            const searchBox = document.getElementById('followSearchBox');
+            const searchTerm = searchBox.value.toLowerCase();
+            const modalBody = document.getElementById('followModalBody');
+            
+            let currentList = currentModalType === 'followers' ? currentFollowers : currentFollowing;
+            
+            if (searchTerm === '') {
+                displayUserList(currentList, currentModalType);
+                return;
+            }
+            
+            const filteredUsers = currentList.filter(user => 
+                user.username.toLowerCase().includes(searchTerm)
+            );
+            
+            if (filteredUsers.length === 0) {
+                modalBody.innerHTML = '<div class="no-follows">No users found matching your search.</div>';
+                return;
+            }
+            
+            displayUserList(filteredUsers, currentModalType);
+        }
+
+        function displayUserList(users, type) {
+            const modalBody = document.getElementById('followModalBody');
+            
+            if (users.length === 0) {
+                const message = type === 'followers' ? 'No followers yet.' : 'Not following anyone yet.';
+                modalBody.innerHTML = `<div class="no-follows">${message}</div>`;
+                return;
+            }
+            
+            let html = '';
+            users.forEach(user => {
+                const customColor = user.username_color || getStatusColor(user.status);
+                const statusColor = getStatusColor(user.status);
+                const statusGif = getStatusBackground(user.status);
+                const statusText = getStatusText(user.status);
+                const gifHtml = statusGif !== 'none' ? `<img src="${statusGif.replace('url("', '').replace('")', '')}" alt="" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.3;">` : '';
+                const textHtml = `<span style="position: relative; z-index: 2;"><span style="color: ${customColor};">${user.username}</span>${statusText ? ' <span style="color: ' + statusColor + ';">' + statusText + '</span>' : ''}</span>`;
+                html += `
+                    <div class="follow-user-item">
+                        <a href="/user/${user.username}" class="follow-user-name" style="font-weight: bold; position: relative; display: inline-block; width: fit-content;">
+                            <div style="position: relative; display: inline-block; width: fit-content;">
+                                ${gifHtml}${textHtml}
+                            </div>
+                        </a>
+                    </div>
+                `;
+            });
+            modalBody.innerHTML = html;
+        }
+    </script>
+    </body>
+</html>
+{% endblock %}

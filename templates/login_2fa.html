@@ -1,0 +1,83 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>2FA Verification - Rarbin</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='legacy/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='files/doxbin.css') }}">
+    <link rel="canonical" href="https://rarbin.com/login/2fa"/>
+    <style>
+        body {
+            background-color: #060606;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .verify-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .verify-container h2 {
+            margin-bottom: 20px;
+            color: #eee;
+        }
+        .form-control {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #333;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 3px;
+        }
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            background-color: #337ab7;
+            color: white;
+            font-size: 16px;
+        }
+        .alert-error {
+            color: #d9534f;
+            background-color: rgba(217, 83, 79, 0.1);
+            border: 1px solid #d9534f;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="verify-container">
+        <h2>Two-Factor Authentication</h2>
+        <p style="color: #aaa; margin-bottom: 20px;">Enter the code from your authenticator app.</p>
+        
+        {% if error %}
+            <div class="alert-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="text" name="token" class="form-control" placeholder="6-digit code" required autocomplete="off" autofocus>
+            <button type="submit" class="btn">Verify</button>
+        </form>
+    </div>
+</body>
+</html>
+{% endblock %} 

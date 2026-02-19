@@ -1,0 +1,758 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Admin Panel | Rarbin</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/legacy/index.css">
+    <link rel="stylesheet" href="/static/legacy/dropdown.css">
+    <link rel="stylesheet" href="/static/files/doxbin.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="canonical" href="https://rarbin.com/admin/panel"/>
+    <style>
+        body {
+            background-color: #060606;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        .admin-container {
+            max-width: 1000px;
+            margin: 100px auto 50px auto;
+            padding: 20px;
+            background-color: #181818;
+        }
+        .admin-container + .admin-container {
+            margin-top: 20px;
+        }
+        .admin-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #222;
+            border: 1px solid #444;
+            border-radius: 5px;
+        }
+        .admin-section h3 {
+            margin-top: 0;
+            color: #ddd;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #aaa;
+        }
+        .form-control {
+            width: 100%;
+            background-color: #181818;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 8px;
+            border-radius: 3px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #444;
+            border-radius: 2px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background-color 0.2s ease;
+        }
+        .btn-primary {
+            background-color: #282828;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #d9534f;
+            color: white;
+        }
+        .btn-success {
+            background-color: #282828;
+            color: white;
+        }
+        .btn-primary:hover,
+        .btn-success:hover {
+            background-color: #3c3c3c;
+        }
+        .reset-link {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 3px;
+            font-family: monospace;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+        .user-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #444;
+            border-radius: 3px;
+        }
+        .user-item {
+            padding: 8px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .user-item:last-child {
+            border-bottom: none;
+        }
+        .user-info {
+            flex-grow: 1;
+        }
+        .user-status {
+            font-size: 12px;
+            color: #888;
+        }
+        .status-badge {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-root { background-color: #d9534f; color: white; }
+        .status-admin { background-color: #f0ad4e; color: white; }
+        .status-manager { background-color: #5bc0de; color: white; }
+        .status-mod { background-color: #337ab7; color: white; }
+        .status-council { background-color: #5cb85c; color: white; }
+        .status-helper { background-color: #777; color: white; }
+        .status-clique { background-color: #9932cc; color: white; }
+        .status-rich { background-color: #ffd700; color: black; }
+        .status-criminal { background-color: #8b0000; color: white; }
+        .status-vip { background-color: #ff69b4; color: white; }
+        .status-user { background-color: #555; color: white; }
+        .access-denied {
+            background-color: rgba(217, 83, 79, 0.1);
+            border: 1px solid #d9534f;
+            color: #d9534f;
+            padding: 15px;
+            border-radius: 3px;
+            text-align: center;
+        }
+        .admin-side-menu {
+            background-color: #181818;
+            flex: 1;
+            border: 1px #282828;
+            border-style: none solid;
+            padding-bottom: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 1000;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+            margin: 0;
+            padding-top: 100px;
+        }
+        .side-menu-btn {
+            background: #181818;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 5px;
+            padding: 9px 18px;
+            font-size: 15px;
+            cursor: pointer;
+            margin-bottom: 4px;
+            transition: background 0.2s;
+            width: 80%;
+            align-self: center;
+        }
+        .side-menu-btn:hover {
+            background: #1C1C1C;
+        }
+        .admin-popup {
+            position: fixed;
+            top: 92px;
+            left: 0;
+            margin-left: 320px;
+            z-index: 1100;
+            display: none;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            margin-top: 0 !important;
+            width: calc(100vw - 280px);
+            max-width: 900px;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+        .admin-section h3 {
+            margin-top: 0 !important;
+        }
+        .pagination-info {
+            margin-bottom: 15px;
+            color: #888;
+            font-size: 14px;
+            text-align: center;
+        }
+        .pagination-controls {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .pagination-controls .pagination-buttons {
+            display: inline-flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .pagination-controls .btn {
+            min-width: 40px;
+            text-align: center;
+        }
+        .pagination-controls .current-page {
+            background-color: #080808 !important;
+            cursor: default;
+        }
+        .pagination-controls .ellipsis {
+            color: #888;
+            padding: 0 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-side-menu">
+        <button class="side-menu-btn" onclick="showAdminSection('reset')">Password Reset</button>
+        <button class="side-menu-btn" onclick="showAdminSection('status')">Assign Roles</button>
+        <button class="side-menu-btn" onclick="showAdminSection('color-access')">Username Color Access</button>
+        <button class="side-menu-btn" onclick="showAdminSection('lock-account')">Account Locking</button>
+                    <button class="side-menu-btn" onclick="showAdminSection('flags')">Flags</button>
+            <button class="side-menu-btn" onclick="showAdminSection('comments')">Comments Management</button>
+            <button class="side-menu-btn" onclick="showAdminSection('edits')">Edit Approvals</button>
+            <button class="side-menu-btn" onclick="showAdminSection('rarsint')">Rarsint</button>
+            <button class="side-menu-btn" onclick="showAdminSection('logs')">Logs</button>
+    </div>
+    <div id="admin-reset-container" class="admin-container admin-popup" style="display:none;">
+            <h3>Password Reset Management</h3>
+            <p>Generate password reset links for users who have forgotten their passwords.</p>
+            
+            {% if reset_link %}
+            <div class="alert alert-success" style="background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 12px; border-radius: 4px; margin-bottom: 20px;">
+                <strong>Reset Link Generated!</strong><br>
+                <div class="reset-link">{{ reset_link }}</div>
+                <button class="btn btn-primary" style="margin-top: 10px;" onclick="copyToClipboard('{{ reset_link }}')">Copy Link</button>
+            </div>
+            {% endif %}
+            
+            <form action="/admin/generate-reset" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                                            <input type="text" id="username" name="username" class="form-control" required autocomplete="off">
+                </div>
+                <div class="form-group" style="justify-content: center;">
+                    <div class="g-recaptcha" data-theme="dark" data-sitekey="6LfkGncrAAAAACAFCgbfJzEZQt8XIr69KTXWSIVp"></div>
+                </div>
+                <button type="submit" class="btn btn-primary">Generate Reset Link</button>
+            </form>
+            
+            <div style="margin-top: 30px;">
+                <h4>Recent Reset Tokens</h4>
+                <div class="reset-tokens-table">
+                    <table style="width:100%; color:#fff; background:#222; border-radius:6px;">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left; padding:8px;">Username</th>
+                                <th style="text-align:left; padding:8px;">Created</th>
+                                <th style="text-align:left; padding:8px;">Expires</th>
+                                <th style="text-align:left; padding:8px;">Status</th>
+                                <th style="text-align:left; padding:8px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for token in reset_tokens %}
+                            <tr>
+                                <td style="padding:8px;">{{ token.username }}</td>
+                                <td style="padding:8px;">{{ token.created_at }}</td>
+                                <td style="padding:8px;">{{ token.expires_at }}</td>
+                                <td style="padding:8px;">
+                                    {% if token.status == 'used' %}
+                                        <span class="status-badge status-user">Used</span>
+                                    {% elif token.status == 'expired' %}
+                                        <span class="status-badge status-criminal">Expired</span>
+                                    {% else %}
+                                        <span class="status-badge status-council">Active</span>
+                                    {% endif %}
+                                </td>
+                                <td style="padding:8px;">
+                                    {% if token.status == 'active' %}
+                                        <button class="btn btn-primary" onclick="copyResetLink('{{ token.token }}')">Copy Link</button>
+                                    {% else %}
+                                        <span style="color: #888;">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="5" style="padding:8px; color:#888; text-align:center;">No reset tokens found.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+    </div>
+    <div id="admin-status-container" class="admin-container admin-popup" style="display:none;">
+            <h3>User Role Management</h3>
+            <p>Assign or change user roles. Only root and admin users can modify user roles.</p>
+            <form action="/admin/assign-status" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                    <label for="target_username">Target Username:</label>
+                                            <input type="text" id="target_username" name="target_username" class="form-control" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="new_status">New Role:</label>
+                    <select id="new_status" name="new_status" class="form-control" required>
+                        <option value="">Select Role</option>
+                        <option value="user">User</option>
+                        <option value="vip">VIP</option>
+                        <option value="criminal">Criminal</option>
+                        <option value="rich">Rich</option>
+                        <option value="clique">Clique</option>
+                        <option value="helper">Helper</option>
+                        <option value="council">Council</option>
+                        <option value="mod">Moderator</option>
+                        {% if user_status != 'manager' %}
+                        <option value="manager">Manager</option>
+                        <option value="admin">Admin</option>
+                        <option value="root">Founder</option>
+                        {% endif %}
+                    </select>
+                </div>
+                <div class="form-group" style="justify-content: center;">
+                    <div class="g-recaptcha" data-theme="dark" data-sitekey="6LfkGncrAAAAACAFCgbfJzEZQt8XIr69KTXWSIVp"></div>
+                </div>
+                <button type="submit" class="btn btn-success">Assign Role</button>
+            </form>
+    </div>
+    <div id="admin-color-access-container" class="admin-container admin-popup" style="display:none;">
+            <h3>Username Color Access Management</h3>
+            <p>Grant or revoke username color access for users. Only users with access can set custom username colors.</p>
+            <form action="/admin/assign-username-color-access" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                    <label for="target_username_color">Target Username:</label>
+                                            <input type="text" id="target_username_color" name="target_username" class="form-control" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="color_access">Color Access:</label>
+                    <select id="color_access" name="color_access" class="form-control" required>
+                        <option value="">Select Access Level</option>
+                        <option value="1">Grant Access</option>
+                        <option value="0">Revoke Access</option>
+                    </select>
+                </div>
+                <div class="form-group" style="justify-content: center;">
+                    <div class="g-recaptcha" data-theme="dark" data-sitekey="6LfkGncrAAAAACAFCgbfJzEZQt8XIr69KTXWSIVp"></div>
+                </div>
+                <button type="submit" class="btn btn-success">Update Color Access</button>
+            </form>
+    </div>
+    <div id="admin-lock-account-container" class="admin-container admin-popup" style="display:none;">
+            <h3>Account Locking Management</h3>
+            <p>Lock or unlock user accounts. Locked accounts cannot log in and will be logged out immediately.</p>
+            <form action="/admin/lock-account" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                    <label for="target_username_lock">Target Username:</label>
+                                            <input type="text" id="target_username_lock" name="target_username" class="form-control" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="lock_action">Action:</label>
+                    <select id="lock_action" name="lock_action" class="form-control" required>
+                        <option value="">Select Action</option>
+                        <option value="lock">Lock Account</option>
+                        <option value="unlock">Unlock Account</option>
+                    </select>
+                </div>
+                <div class="form-group" style="justify-content: center;">
+                    <div class="g-recaptcha" data-theme="dark" data-sitekey="6LfkGncrAAAAACAFCgbfJzEZQt8XIr69KTXWSIVp"></div>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Account Status</button>
+            </form>
+    </div>
+    <div id="admin-flags-container" class="admin-container admin-popup" style="display:none;">
+            <h3>Flagged Pastes (Pending Deletion)</h3>
+            <p>Approve or deny admin delete requests below.</p>
+            <div class="admin-flags-table">
+                <table style="width:100%; color:#fff; background:#222; border-radius:6px;">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left; padding:8px;">Title</th>
+                            <th style="text-align:left; padding:8px;">Requested By</th>
+                            <th style="text-align:left; padding:8px;">Requested At</th>
+                            <th style="text-align:left; padding:8px;">Reason</th>
+                            <th style="text-align:left; padding:8px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for paste in flagged_pastes %}
+                        <tr>
+                            <td style="padding:8px;">{{ paste.pastname }}</td>
+                            <td style="padding:8px;">{{ paste.deletion_requested_by }}</td>
+                            <td style="padding:8px;">{{ paste.deletion_requested_at }}</td>
+                            <td style="padding:8px;">
+                                <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ paste.deletion_reason or 'No reason provided' }}">
+                                    {{ paste.deletion_reason or 'No reason provided' }}
+                                </div>
+                            </td>
+                            <td style="padding:8px;">
+                                <a href="{{ url_for('post', file=paste.url_name if paste.url_name else paste.pastname) }}?admin_view=1" class="btn btn-primary" target="_blank">View</a>
+                                <form action="/admin/approve-delete/{{ paste.url_name if paste.url_name else paste.pastname }}" method="post" style="display:inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                                <form action="/admin/deny-delete/{{ paste.url_name if paste.url_name else paste.pastname }}" method="post" style="display:inline; margin-left:8px;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-success">Cancel</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5" style="padding:8px; color:#888; text-align:center;">No flagged pastes.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+    </div>
+    <div id="admin-comments-container" class="admin-container admin-popup" style="display:none;">
+            <h3>Manage Comments Disabled Status</h3>
+            <p>Toggle comments disabled status for pastes. When disabled, users cannot add new comments to the paste.</p>
+            <div class="form-group">
+                <label for="paste_url_name">Paste URL Name or Full URL:</label>
+                                        <input type="text" id="paste_url_name" name="paste_url_name" class="form-control" placeholder="Enter paste URL name (e.g., my-paste-title) or full URL (e.g., https://rarbin.com/post/my-paste-title)" autocomplete="off">
+            </div>
+            <button type="button" class="btn btn-primary" onclick="toggleComments()">Toggle Comments Status</button>
+            
+            <div id="comments-status-result" style="margin-top: 15px;"></div>
+    </div>
+    <div id="admin-edits-container" class="admin-container admin-popup" style="display:none;">
+            <h3>Pending Edit Approvals</h3>
+            <p>Approve or deny edit requests from users with 'user' status.</p>
+            <div class="admin-edits-table">
+                <table style="width:100%; color:#fff; background:#222; border-radius:6px;">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left; padding:8px;">Paste Title</th>
+                            <th style="text-align:left; padding:8px;">Editor</th>
+                            <th style="text-align:left; padding:8px;">Reason</th>
+                            <th style="text-align:left; padding:8px;">Requested At</th>
+                            <th style="text-align:left; padding:8px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for edit in pending_edits %}
+                        <tr>
+                            <td style="padding:8px;">{{ edit.pastname or edit.paste_url_name }}</td>
+                            <td style="padding:8px;">{{ edit.editor_username }}</td>
+                            <td style="padding:8px;">
+                                <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ edit.edit_reason }}">
+                                    {{ edit.edit_reason }}
+                                </div>
+                            </td>
+                            <td style="padding:8px;">{{ edit.requested_at }}</td>
+                            <td style="padding:8px;">
+                                <a href="{{ url_for('post', file=edit.paste_url_name) }}?admin_view=1" class="btn btn-primary" target="_blank">View Paste</a>
+                                <button class="btn btn-success" data-edit-id="{{ edit.id }}" data-original="{{ edit.original_content|replace('\n', '\\n')|replace('"', '\\"') }}" data-new="{{ edit.new_content|replace('\n', '\\n')|replace('"', '\\"') }}" data-reason="{{ edit.edit_reason|replace('\n', '\\n')|replace('"', '\\"') }}" onclick="showEditDiff(this)">View Changes</button>
+                                <form action="/admin/approve-edit/{{ edit.id }}" method="post" style="display:inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-success">Approve</button>
+                                </form>
+                                <form action="/admin/deny-edit/{{ edit.id }}" method="post" style="display:inline; margin-left:8px;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-danger">Deny</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5" style="padding:8px; color:#888; text-align:center;">No pending edit requests.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+    </div>
+    <div id="admin-logs-container" class="admin-container admin-popup" style="display:none;">
+            <h3>Admin Logs</h3>
+            <p>All admin actions are logged below. Showing {{ per_page }} logs per page.</p>
+            
+            <div class="pagination-info">
+                {% if total_logs > 0 %}
+                    {% set start_item = (current_page - 1) * per_page + 1 %}
+                    {% set end_item = current_page * per_page %}
+                    {% if end_item > total_logs %}
+                        {% set end_item = total_logs %}
+                    {% endif %}
+                    Showing {{ start_item }}-{{ end_item }} of {{ total_logs }} total logs
+                {% else %}
+                    No logs found
+                {% endif %}
+            </div>
+            
+            <div class="admin-logs-table">
+                <table style="width:100%; color:#fff; background:#222; border-radius:6px;">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left; padding:8px;">Timestamp</th>
+                            <th style="text-align:left; padding:8px;">Admin</th>
+                            <th style="text-align:left; padding:8px;">Action</th>
+                            <th style="text-align:left; padding:8px;">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in admin_logs %}
+                        <tr>
+                            <td style="padding:8px;">{{ log.timestamp }}</td>
+                            <td style="padding:8px;">{{ log.admin }}</td>
+                            <td style="padding:8px;">{{ log.action }}</td>
+                            <td style="padding:8px;">{{ log.details }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" style="padding:8px; color:#888; text-align:center;">No logs found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if total_pages > 1 %}
+            <div class="pagination-controls">
+                <div class="pagination-buttons">
+                    {% if current_page > 1 %}
+                        <a href="{{ url_for('admin_panel', page=current_page-1) }}#logs" class="btn btn-primary">&laquo; Previous</a>
+                    {% endif %}
+                    
+                    {% for page_num in range(1, total_pages + 1) %}
+                        {% if page_num == current_page %}
+                            <span class="btn btn-primary current-page">{{ page_num }}</span>
+                        {% elif page_num <= 3 or page_num > total_pages - 3 or (page_num >= current_page - 1 and page_num <= current_page + 1) %}
+                            <a href="{{ url_for('admin_panel', page=page_num) }}#logs" class="btn btn-primary">{{ page_num }}</a>
+                        {% elif page_num == 4 and current_page > 6 %}
+                            <span class="ellipsis">...</span>
+                        {% elif page_num == total_pages - 3 and current_page < total_pages - 5 %}
+                            <span class="ellipsis">...</span>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if current_page < total_pages %}
+                        <a href="{{ url_for('admin_panel', page=current_page+1) }}#logs" class="btn btn-primary">Next &raquo;</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+    </div>
+    <div id="admin-rarsint-container" class="admin-container admin-popup" style="display:none;">
+            <h3>Rarsint - Snusbase Search</h3>
+            <p>Search through various data sources using the Snusbase API. Use this tool responsibly and in accordance with applicable laws.</p>
+            
+            {% if rarsint_error %}
+            <div class="alert alert-danger" style="background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 12px; border-radius: 4px; margin-bottom: 20px;">
+                <strong>Error:</strong> {{ rarsint_error }}
+            </div>
+            {% endif %}
+            
+            <form action="/admin/rarsint" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                    <label for="search_type">Search Type:</label>
+                    <select id="search_type" name="search_type" class="form-control" required>
+                        <option value="">Select Search Type</option>
+                        <option value="email">Email</option>
+                        <option value="username">Username</option>
+                        <option value="lastip">Last IP</option>
+                        <option value="password">Password</option>
+                        <option value="hash">Hash</option>
+                        <option value="name">Name</option>
+                        <option value="_domain">Domain</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="search_query">Search Query:</label>
+                                            <input type="text" id="search_query" name="search_query" class="form-control" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="wildcard" name="wildcard" value="1">
+                        Enable Wildcard Search
+                    </label>
+                </div>
+                <div class="form-group" style="justify-content: center;">
+                    <div class="g-recaptcha" data-theme="dark" data-sitekey="6LfkGncrAAAAACAFCgbfJzEZQt8XIr69KTXWSIVp"></div>
+                </div>
+                <button type="submit" name="rarsint_search" class="btn btn-primary">Search</button>
+            </form>
+            
+            {% if rarsint_results %}
+            <div style="margin-top: 30px;">
+                <h4>Search Results</h4>
+                <div class="rarsint-results-json">
+                    <pre id="json-results" style="background:#181818; padding:15px; border-radius:6px; white-space:pre-wrap; max-height:600px; overflow:auto; margin:0; color:#fff; border:1px solid #444; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.4;">{{ rarsint_results }}</pre>
+                </div>
+                <script>
+                    try {
+                        var jsonElement = document.getElementById('json-results');
+                        var jsonData = JSON.parse(jsonElement.textContent);
+                        jsonElement.textContent = JSON.stringify(jsonData, null, 2);
+                    } catch (e) {
+                        console.log('JSON formatting failed:', e);
+                    }
+                </script>
+            </div>
+            {% endif %}
+    </div>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>
+        function showAdminSection(section) {
+            document.getElementById('admin-reset-container').style.display = (section === 'reset') ? 'block' : 'none';
+            document.getElementById('admin-status-container').style.display = (section === 'status') ? 'block' : 'none';
+            document.getElementById('admin-color-access-container').style.display = (section === 'color-access') ? 'block' : 'none';
+            document.getElementById('admin-lock-account-container').style.display = (section === 'lock-account') ? 'block' : 'none';
+            document.getElementById('admin-flags-container').style.display = (section === 'flags') ? 'block' : 'none';
+            document.getElementById('admin-comments-container').style.display = (section === 'comments') ? 'block' : 'none';
+            document.getElementById('admin-edits-container').style.display = (section === 'edits') ? 'block' : 'none';
+            document.getElementById('admin-rarsint-container').style.display = (section === 'rarsint') ? 'block' : 'none';
+            document.getElementById('admin-logs-container').style.display = (section === 'logs') ? 'block' : 'none';
+        }
+        
+        function toggleComments() {
+            var pasteUrlName = document.getElementById('paste_url_name').value.trim();
+            if (!pasteUrlName) {
+                alert('Please enter a paste URL name or full URL.');
+                return;
+            }
+            
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/admin/toggle-comments';
+            
+            var pasteInput = document.createElement('input');
+            pasteInput.type = 'hidden';
+            pasteInput.name = 'paste_url_name';
+            pasteInput.value = pasteUrlName;
+            form.appendChild(pasteInput);
+            
+            var csrfToken = document.querySelector('input[name="csrf_token"]').value;
+            var csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrf_token';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+        
+        function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(function() {
+                    alert('Reset link copied to clipboard!');
+                }).catch(function(err) {
+                    fallbackCopyTextToClipboard(text);
+                });
+            } else {
+                fallbackCopyTextToClipboard(text);
+            }
+        }
+        
+        function fallbackCopyTextToClipboard(text) {
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                var successful = document.execCommand('copy');
+                if (successful) {
+                    alert('Reset link copied to clipboard!');
+                } else {
+                    alert('Failed to copy link. Please copy manually.');
+                }
+            } catch (err) {
+                alert('Failed to copy link. Please copy manually.');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+        
+        function copyResetLink(token) {
+            var baseUrl = window.location.origin;
+            var resetUrl = baseUrl + '/reset-password/' + token;
+            copyToClipboard(resetUrl);
+        }
+        
+        function showEditDiff(button) {
+            var editId = button.getAttribute('data-edit-id');
+            var original = button.getAttribute('data-original');
+            var newContent = button.getAttribute('data-new');
+            var reason = button.getAttribute('data-reason');
+            
+            var modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; align-items:center; justify-content:center;';
+            
+            var content = document.createElement('div');
+            content.style.cssText = 'background:#222; padding:20px; border-radius:5px; max-width:80%; max-height:80%; overflow:auto; color:white;';
+            
+            content.innerHTML = `
+                <h3>Edit Changes for Request #${editId}</h3>
+                <div style="margin-bottom:20px;">
+                    <h4>Reason for Edit:</h4>
+                    <p style="background:#181818; padding:10px; border-radius:3px; margin:0;">${reason}</p>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:20px;">
+                    <div>
+                        <h4>Original Content:</h4>
+                        <pre style="background:#181818; padding:10px; border-radius:3px; white-space:pre-wrap; max-height:400px; overflow:auto;">${original}</pre>
+                    </div>
+                    <div>
+                        <h4>New Content:</h4>
+                        <pre style="background:#181818; padding:10px; border-radius:3px; white-space:pre-wrap; max-height:400px; overflow:auto;">${newContent}</pre>
+                    </div>
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()" style="margin-top:20px; padding:8px 16px; background:#444; color:white; border:none; border-radius:3px; cursor:pointer;">Close</button>
+            `;
+            
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+        
+        showAdminSection('reset');
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.location.hash) {
+                var section = window.location.hash.substring(1);
+                if (section === 'logs') {
+                    showAdminSection('logs');
+                } else if (section === 'rarsint') {
+                    showAdminSection('rarsint');
+                }
+            }
+        });
+        
+        if (window.location.hash === '#logs') {
+            showAdminSection('logs');
+        } else if (window.location.hash === '#rarsint') {
+            showAdminSection('rarsint');
+        }
+    </script>
+</body>
+</html>
+{% endblock %} 
