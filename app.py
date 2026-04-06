@@ -151,7 +151,9 @@ def too_large(e):
 # Define UTC timezone once at the top
 UTC_TZ = pytz.UTC
 
-DATABASE = 'database.db'
+import os
+
+DATABASE = os.environ.get("DATABASE_URL")
 
 def get_db():
     db = getattr(g, '_database', None)
