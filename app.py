@@ -3,7 +3,12 @@ import os
 import requests
 import json
 from datetime import datetime, timedelta, timezone
-import sqlite3
+import psycopg2
+import psycopg2.extras
+import os
+
+conn = psycopg2.connect(os.environ["DATABASE_URL"])
+cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 from werkzeug.security import generate_password_hash, check_password_hash
 import pytz
 import humanize
