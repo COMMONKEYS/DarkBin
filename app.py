@@ -7,8 +7,14 @@ import psycopg2
 import psycopg2.extras
 import os
 
-conn = psycopg2.connect(os.environ["DATABASE_URL"])
-cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+import psycopg2
+import psycopg2.extras
+import os
+
+def get_db():
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    return conn, cursor
 from werkzeug.security import generate_password_hash, check_password_hash
 import pytz
 import humanize
