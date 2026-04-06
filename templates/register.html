@@ -117,7 +117,6 @@
                 <div class="register-div">
                     <div id="error-msg" style="color: red; padding: 10px 0px 0px 0px; text-align: center; margin: 0;"></div>
                     <form action="" method="POST" id="register-form">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <label for="username">Username</label><br>
                         <input name="username" id="username" type="text" placeholder="Username" minlength="2" maxlength="16" pattern="[A-Za-z0-9]+" title="Only letters and numbers are allowed" required autocomplete="off"><br>
                         <label for="email">Email</label><br>
