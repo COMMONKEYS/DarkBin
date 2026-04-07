@@ -1,54 +1,34 @@
 from flask import Flask, request, jsonify, render_template, redirect, make_response
+from flask_wtf import CSRFProtect
 import psycopg2
 import psycopg2.extras
 import os
 import hashlib
 import secrets
-import humanize
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev")
-app.config["DEBUG"] = True
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
 
+# ✅ FIX CSRF
+csrf = CSRFProtect(app)
+
+# ✅ DATABASE
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-
 # -----------------------
-# ERROR HANDLER
-# -----------------------
-@app.errorhandler(Exception)
-def handle_error(e):
-    return f"<h1>ERROR:</h1><pre>{e}</pre>", 500
-
-
-# -----------------------
-# TEMPLATE FILTER
-# -----------------------
-@app.template_filter('naturaltime')
-def naturaltime_filter(value):
-    if isinstance(value, str):
-        try:
-            value = datetime.fromisoformat(value)
-        except:
-            return value
-    return humanize.naturaltime(datetime.utcnow() - value)
-
-
-# -----------------------
-# DATABASE
+# DATABASE CONNECTION
 # -----------------------
 def get_db():
     if not DATABASE_URL:
-        raise Exception("DATABASE_URL not set")
+        raise Exception("DATABASE_URL is missing")
 
-    conn = psycopg2.connect(DATABASE_URL)
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     return conn, cursor
 
-
 # -----------------------
-# INIT TABLES
+# INIT DATABASE
 # -----------------------
 def init_db():
     conn, cursor = get_db()
@@ -92,16 +72,6 @@ def init_db():
     """)
 
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS profile_comments (
-        id SERIAL PRIMARY KEY,
-        profile_user_id INTEGER,
-        commenter_user_id INTEGER,
-        content TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    """)
-
-    cursor.execute("""
     CREATE TABLE IF NOT EXISTS follows (
         id SERIAL PRIMARY KEY,
         follower_id INTEGER,
@@ -110,25 +80,30 @@ def init_db():
     );
     """)
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS notifications (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER,
-        message TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    """)
-
     conn.commit()
     conn.close()
 
+# -----------------------
+# JINJA FIX (naturaltime)
+# -----------------------
+@app.template_filter('naturaltime')
+def naturaltime(value):
+    now = datetime.utcnow()
+    diff = now - value
+
+    if diff.days > 0:
+        return f"{diff.days}d ago"
+    elif diff.seconds > 3600:
+        return f"{diff.seconds // 3600}h ago"
+    elif diff.seconds > 60:
+        return f"{diff.seconds // 60}m ago"
+    return "just now"
 
 # -----------------------
 # HELPERS
 # -----------------------
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
-
 
 def create_session(user_id):
     token = secrets.token_hex(32)
@@ -144,14 +119,12 @@ def create_session(user_id):
 
     return token
 
-
 def get_user():
     token = request.cookies.get("session")
     if not token:
         return None
 
     conn, cursor = get_db()
-
     cursor.execute(
         "SELECT * FROM sessions WHERE token = %s AND expires > NOW()",
         (token,)
@@ -168,19 +141,17 @@ def get_user():
 
     return user
 
-
 # -----------------------
-# ROUTES
+# ROUTES (HTML)
 # -----------------------
 @app.route("/")
 def home():
     conn, cursor = get_db()
-    cursor.execute("SELECT * FROM pasts ORDER BY id DESC")
+    cursor.execute("SELECT * FROM pasts ORDER BY id DESC LIMIT 20")
     pasts = cursor.fetchall()
     conn.close()
 
     return render_template("index.html", pasts=pasts, user=get_user())
-
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -189,9 +160,6 @@ def register():
 
     username = request.form.get("username")
     password = request.form.get("password")
-
-    if not username or not password:
-        return render_template("register.html", error="Missing fields")
 
     conn, cursor = get_db()
 
@@ -204,14 +172,13 @@ def register():
         conn.commit()
     except Exception as e:
         conn.close()
-        return render_template("register.html", error="Username taken")
+        return render_template("register.html", error="Username already taken")
 
     token = create_session(user_id)
 
-    response = redirect("/")
-    response.set_cookie("session", token)
-    return response
-
+    resp = make_response(redirect("/"))
+    resp.set_cookie("session", token)
+    return resp
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -231,22 +198,14 @@ def login():
 
     token = create_session(user["id"])
 
-    response = redirect("/")
-    response.set_cookie("session", token)
-    return response
-
-
-@app.route("/logout")
-def logout():
-    response = redirect("/")
-    response.delete_cookie("session")
-    return response
-
+    resp = make_response(redirect("/"))
+    resp.set_cookie("session", token)
+    return resp
 
 # -----------------------
-# PASTES
+# PASTE SYSTEM
 # -----------------------
-@app.route("/paste", methods=["POST"])
+@app.route("/create", methods=["POST"])
 def create_paste():
     user = get_user()
     if not user:
@@ -265,31 +224,30 @@ def create_paste():
 
     return redirect("/")
 
-
-@app.route("/paste/<int:paste_id>")
-def view_paste(paste_id):
+@app.route("/paste/<int:id>")
+def view_paste(id):
     conn, cursor = get_db()
 
-    cursor.execute("SELECT * FROM pasts WHERE id = %s", (paste_id,))
+    cursor.execute("SELECT * FROM pasts WHERE id = %s", (id,))
     paste = cursor.fetchone()
 
-    cursor.execute("SELECT * FROM comments WHERE paste_id = %s", (paste_id,))
+    cursor.execute("SELECT * FROM comments WHERE paste_id = %s", (id,))
     comments = cursor.fetchall()
 
     conn.close()
 
     return render_template("paste.html", paste=paste, comments=comments, user=get_user())
 
-
 # -----------------------
 # COMMENTS
 # -----------------------
-@app.route("/comment/<int:paste_id>", methods=["POST"])
-def add_comment(paste_id):
+@app.route("/comment", methods=["POST"])
+def comment():
     user = get_user()
     if not user:
         return redirect("/login")
 
+    paste_id = request.form.get("paste_id")
     content = request.form.get("content")
 
     conn, cursor = get_db()
@@ -302,28 +260,20 @@ def add_comment(paste_id):
 
     return redirect(f"/paste/{paste_id}")
 
+# -----------------------
+# ERROR HANDLER (VERY IMPORTANT)
+# -----------------------
+@app.errorhandler(Exception)
+def handle_error(e):
+    return f"""
+    <h1>ERROR</h1>
+    <pre>{str(e)}</pre>
+    """, 500
 
 # -----------------------
-# PROFILE
+# STARTUP
 # -----------------------
-@app.route("/user/<username>")
-def profile(username):
-    conn, cursor = get_db()
+init_db()
 
-    cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-    user_profile = cursor.fetchone()
-
-    cursor.execute("SELECT * FROM pasts WHERE user_id = %s", (user_profile["id"],))
-    pasts = cursor.fetchall()
-
-    conn.close()
-
-    return render_template("profile.html", profile=user_profile, pasts=pasts, user=get_user())
-
-
-# -----------------------
-# START
-# -----------------------
 if __name__ == "__main__":
-    init_db()
     app.run(debug=True)
