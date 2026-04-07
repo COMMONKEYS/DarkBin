@@ -5,18 +5,29 @@ import os
 import hashlib
 import secrets
 from datetime import datetime, timedelta
-app.config["DEBUG"] = True
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev")
+app.config["DEBUG"] = True  # ✅ NOW it's in the right place
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
+
+
+# -----------------------
+# ERROR HANDLER (SHOW REAL ERRORS)
+# -----------------------
+@app.errorhandler(Exception)
+def handle_error(e):
+    return f"<h1>ERROR:</h1><pre>{e}</pre>", 500
 
 
 # -----------------------
 # DATABASE
 # -----------------------
 def get_db():
+    if not DATABASE_URL:
+        raise Exception("DATABASE_URL is not set")
+
     conn = psycopg2.connect(DATABASE_URL)
     cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     return conn, cursor
@@ -66,34 +77,6 @@ def init_db():
     );
     """)
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS profile_comments (
-        id SERIAL PRIMARY KEY,
-        profile_user_id INTEGER,
-        commenter_user_id INTEGER,
-        content TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    """)
-
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS follows (
-        id SERIAL PRIMARY KEY,
-        follower_id INTEGER,
-        following_id INTEGER,
-        UNIQUE(follower_id, following_id)
-    );
-    """)
-
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS notifications (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER,
-        message TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    """)
-
     conn.commit()
     conn.close()
 
@@ -120,31 +103,8 @@ def create_session(user_id):
     return token
 
 
-def get_user(token):
-    if not token:
-        return None
-
-    conn, cursor = get_db()
-
-    cursor.execute(
-        "SELECT * FROM sessions WHERE token = %s AND expires > NOW()",
-        (token,)
-    )
-    session_data = cursor.fetchone()
-
-    if not session_data:
-        conn.close()
-        return None
-
-    cursor.execute("SELECT * FROM users WHERE id = %s", (session_data["user_id"],))
-    user = cursor.fetchone()
-    conn.close()
-
-    return user
-
-
 # -----------------------
-# ROUTES (HTML)
+# ROUTES
 # -----------------------
 @app.route("/")
 def home():
@@ -159,6 +119,9 @@ def register():
     username = request.form.get("username")
     password = request.form.get("password")
 
+    if not username or not password:
+        return render_template("register.html", error="Missing fields")
+
     conn, cursor = get_db()
 
     try:
@@ -170,7 +133,7 @@ def register():
         conn.commit()
     except Exception as e:
         conn.close()
-        return render_template("register.html", error="Username taken")
+        return render_template("register.html", error=str(e))
 
     token = create_session(user_id)
 
@@ -200,45 +163,6 @@ def login():
     response = redirect("/")
     response.set_cookie("session", token)
     return response
-
-
-# -----------------------
-# API ROUTES (JSON)
-# -----------------------
-@app.route("/api/register", methods=["POST"])
-def api_register():
-    data = request.json
-    conn, cursor = get_db()
-
-    try:
-        cursor.execute(
-            "INSERT INTO users (username, password) VALUES (%s, %s) RETURNING id",
-            (data["username"], hash_password(data["password"]))
-        )
-        user_id = cursor.fetchone()["id"]
-        conn.commit()
-    except:
-        conn.close()
-        return jsonify({"error": "Username taken"}), 400
-
-    token = create_session(user_id)
-    return jsonify({"token": token})
-
-
-@app.route("/api/login", methods=["POST"])
-def api_login():
-    data = request.json
-    conn, cursor = get_db()
-
-    cursor.execute("SELECT * FROM users WHERE username = %s", (data["username"],))
-    user = cursor.fetchone()
-    conn.close()
-
-    if not user or user["password"] != hash_password(data["password"]):
-        return jsonify({"error": "Invalid login"}), 401
-
-    token = create_session(user["id"])
-    return jsonify({"token": token})
 
 
 # -----------------------
