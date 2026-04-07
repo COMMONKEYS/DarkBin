@@ -45,11 +45,11 @@ from urllib.parse import urlparse
 
 # Security: Function to get reCAPTCHA secret key from environment
 def get_recaptcha_secret_key():
-    return os.environ.get('RECAPTCHA_SECRET_KEY', '6LfkGncrAAAAAMkmjkqYyZoOL9NRbqO3ul80BNw9')
+    return os.environ.get('RECAPTCHA_SECRET_KEY', '6Lct7assAAAAAH4jKus0wI_j32JUYUSSL0ANBPCL')
 
 # Security: Function to get reCAPTCHA site key from environment
 def get_recaptcha_site_key():
-    return os.environ.get('RECAPTCHA_SITE_KEY', '6LfkGncrAAAAACAFCgbfJzEZQt8XIr69KTXWSIVp')
+    return os.environ.get('RECAPTCHA_SITE_KEY', '6Lct7assAAAAAF2ImaBWg5wS-J3_yEUkwKSarch3')
 
 def get_file_version(filepath):
     """Get a version string for cache busting based on file modification time"""
