@@ -2385,15 +2385,27 @@ def support():
 
 
 @app.route("/hoa")
-def hall_of_loosers():
-    global loosers_list
-    refreshLoosers()
-    return render_template(
-        "hoa.html",
-        loosers_list=loosers_list,
-        username=session.get('username')
-    )
+def hoa():
+    import os, json
 
+    file_path = os.path.join("data", "hol.json")
+
+    # create file if missing
+    if not os.path.exists(file_path):
+        os.makedirs("data", exist_ok=True)
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump({"loosers": []}, f)
+
+    # load data safely
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            loosers_list = data.get("loosers", [])
+    except:
+        loosers_list = []
+
+    return render_template("hoa.html", loosers_list=loosers_list)
+    
 @app.route("/upgrades")
 def upgrades():
         return render_template("upgrades.html", username=session.get('username'))
