@@ -985,8 +985,7 @@ DATA = os.path.join(os.getcwd(), "data")
 ADMIN_PASTES = os.path.join(os.getcwd(), "data", "admin")
 ANON_PASTES = os.path.join(os.getcwd(), "data", "other")
 
-with open(os.path.join(DATA, "template"), "r", encoding="utf-8") as temp_file:
-    _DEFAULT_POST_TEMPLATE = temp_file.read()
+_DEFAULT_POST_TEMPLATE = ""
 
 admin_posts_list = []
 anon_posts_list = []
