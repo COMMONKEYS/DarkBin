@@ -1,3 +1,5 @@
+os.makedirs("data/admin", exist_ok=True)
+os.makedirs("data/other", exist_ok=True)
 from flask import Flask, render_template, request, redirect, session, url_for, flash, g, jsonify, Response
 import os
 import requests
