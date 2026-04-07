@@ -146,7 +146,7 @@ def too_large(e):
 # Define UTC timezone once at the top
 UTC_TZ = pytz.UTC
 
-DATABASE = 'database.db'
+DATABASE = "/var/data/database.db"
 
 def get_db():
     db = getattr(g, '_database', None)
