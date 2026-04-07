@@ -1,0 +1,124 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<head>
+    <title>Login | Rarbin</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/legacy/index.css">
+    <link rel="stylesheet" href="/static/files/dropdown.css">
+    <link rel="stylesheet" href="/static/files/bootstrap.min.js">
+    <link rel="stylesheet" href="/static/files/doxbin.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="canonical" href="https://rarbin.com/login"/>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="robots" content="noindex">
+	<style>
+    .login-div{
+        margin: 0 auto;
+        max-width: 500px;
+        min-width: 100px;
+        width: 100%;
+        text-align: left;
+    }
+    .login-div label{
+        padding: 10px 0px 1px 3px;
+        margin: 0;
+    }
+	input{
+		line-height: 1.2;
+		color: white;
+		background: #282828;
+		border: 0;
+		border-radius: 2px;
+		display: inline-block;
+		-webkit-font-smoothing: antialiased;
+		outline: none;
+		padding: 7px 5px;
+        width: 100%;
+	}
+	input::placeholder{
+		color: rgb(167, 167, 167);
+	}
+	input[type=submit]{
+		line-height: 1.2;
+		color: white;
+		background: #282828;
+		border: 0;
+		border-radius: 2px;
+		display: block;
+		-webkit-font-smoothing: antialiased;
+		outline: none;
+		padding: 7px 5px;
+        width: 90%;
+        margin: 15px auto 50px auto;
+	}
+	input{
+		font-size: 100%;
+	}
+	
+	input[type=submit]:hover{
+		color: white;
+		background: #3d3d3d;
+		text-decoration: none;
+	}
+	.center {
+	  text-align: center;
+	}
+    .recaptcha-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 20px 0;
+    }
+    form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+	</style>
+</head>
+
+<body>
+    {% endblock %}
+
+    {% block bottom %}
+    <div class="container" style="background-color: #111111; min-height: 100vh;-webkit-box-shadow: 0px 0px 7px 0px rgba(31,31,31,1);-moz-box-shadow: 0px 0px 7px 0px rgba(31,31,31,1);box-shadow: 0px 0px 7px 0px rgba(31,31,31,1);">
+        <div class="col-md-12" style="margin-top: 10px;">
+            <div class="col-md-12" style="margin-top: 80px;">
+                <div align="center">
+                    <h5 style="font-size: 25px;">Login</h5>
+                    {% if error %} 
+                    <p class="error" style="color: red; padding: 0px 0px 10px 0px; text-align: center; margin: 0;">{{ error }}</p> 
+                    {% endif %} 
+                    <noscript><p style="color: red; padding: 0px 0px 10px 0px; text-align: center; margin: 0;">Rarbin requires JavaScript to function correctly.</noscript>
+                    <div id="error-msg" style="color: red; padding: 0px 0px 10px 0px; text-align: center; margin: 0;"></div>
+                </div>
+            </div>
+            <div class="col-md-6 col-md-offset-3 text-center">
+                <p style="color: green;"></p>
+                <div class="login-div">
+                <form action="" method="POST" id="login-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <label for="username">Username</label><br>
+                                            <input type="text" name="username" placeholder="Username" required autocomplete="off">
+                    <label for="username">Password</label><br>
+                                            <input type="password" name="password" id="passwordInput" placeholder="Password" required autocomplete="off">
+                    
+                    <div class="recaptcha-container">
+                        <div class="g-recaptcha" data-theme="dark" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
+                    </div><br>
+
+                    <input type="submit" value="Login">
+                </div>
+            </div>
+        </div>
+    </div>
+<div style="background-color: rgb(255, 255, 255); border: 1px solid rgb(204, 204, 204); box-shadow: rgba(0, 0, 0, 0.2) 2px 2px 3px; position: absolute; transition: visibility 0s linear 0.3s, opacity 0.3s linear; opacity: 0; visibility: hidden; z-index: 2000000000; left: 0px; top: -10000px;"><div style="width: 100%; height: 100%; position: fixed; top: 0px; left: 0px; z-index: 2000000000; background-color: rgb(255, 255, 255); opacity: 0.05;"></div><div style="border: 11px solid transparent; width: 0px; height: 0px; position: absolute; pointer-events: none; margin-top: -11px; z-index: 2000000000;" class="g-recaptcha-bubble-arrow"></div><div style="border: 10px solid transparent; width: 0px; height: 0px; position: absolute; pointer-events: none; margin-top: -10px; z-index: 2000000000;" class="g-recaptcha-bubble-arrow"></div><div style="z-index: 2000000000; position: relative;"><iframe title="текущую проверку reCAPTCHA можно пройти в течение ещё двух минут" style="width: 100%; height: 100%;" name="c-20ewu2bb77o" frameborder="0" scrolling="no" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation allow-modals allow-popups-to-escape-sandbox allow-storage-access-by-user-activation" src="Login%20-%20Doxbin_files/bframe.htm"></iframe></div></div></body></html>
+{% endblock %}

@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>{{ filename }} | Rarbin</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='legacy/app.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='legacy/google-code-prettify/tomorrow-night.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='legacy/css/show.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='legacy/toastr/toastr.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='legacy/custom.modernizr.js') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='legacy/jquery.min.js') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='files/doxbin.css') }}">
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="canonical" href="https://rarbin.com/{{ url_name }}"/>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+    <style>
+        select,
+        option {
+            line-height: 1.2;
+            color: white;
+            background: #282828;
+            border: 0;
+            border-radius: 2px;
+            display: inline-block;
+            -webkit-font-smoothing: antialiased;
+            outline: none;
+            padding: 7px 5px;
+            width: 50%;
+        }
+
+        .right {
+            text-align: right;
+            width: 100%;
+        }
+
+        select,
+        option {
+            font-size: 100%;
+        }
+
+        input#paste-password:disabled {
+            color: rgb(190, 190, 190);
+        }
+
+        pre a:hover {
+            text-decoration: underline;
+        }
+
+        @font-face {
+            font-family: 'Material Icons';
+            font-style: normal;
+            font-weight: 400;
+            src: url(https://example.com/MaterialIcons-Regular.eot);
+            src: local('Material Icons'),
+                local('MaterialIcons-Regular'),
+                url(https://doxbin.org/MaterialIcons-Regular.woff2) format('woff2'),
+                url(https://doxbin.org/MaterialIcons-Regular.woff) format('woff'),
+                url(https://doxbin.org/MaterialIcons-Regular.ttf) format('truetype');
+        }
+
+
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+
+            -moz-osx-font-smoothing: grayscale;
+
+            font-feature-settings: 'liga';
+        }
+
+
+        .like-dislike-paste a,
+        .like-dislike-paste span {
+            display: inline-block;
+        }
+
+        .like-dislike-paste a span.material-icons,
+        .like-dislike-paste span span.material-icons {
+            font-size: 17px;
+            margin-right: 3px;
+        }
+
+        .like-dislike-paste a span.paste-likes,
+        .like-dislike-paste a span.paste-dislikes {
+            font-size: 13px;
+        }
+
+
+
+        .like-dislike-comment a,
+        .like-dislike-comment span {
+            display: inline-block;
+        }
+
+        .like-dislike-comment a span.material-icons,
+        .like-dislike-comment span span.material-icons {
+            font-size: 15px;
+            margin-right: 2px;
+        }
+
+        .like-dislike-comment a span.comment-likes,
+        .like-dislike-comment a span.comment-dislikes {
+            font-size: 13px;
+        }
+
+        .flag-popup {
+            display: none !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: rgba(0, 0, 0, 0.85) !important;
+            z-index: 1001 !important;
+        }
+
+        .flag-popup.show {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        .flag-popup-content {
+            background: #141414 !important;
+            padding: 24px !important;
+            width: 90% !important;
+            max-width: 400px !important;
+            color: #fff !important;
+            border: 1px solid #333 !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        .flag-popup-content h3 {
+            color: #fff !important;
+            margin-bottom: 16px !important;
+            font-size: 18px !important;
+            line-height: 1.5 !important;
+        }
+
+        .flag-popup-content p {
+            color: #888 !important;
+            margin-bottom: 20px !important;
+            font-size: 14px !important;
+            line-height: 1.5 !important;
+        }
+
+        .flag-popup-content .form-group {
+            margin-bottom: 20px !important;
+        }
+
+        .flag-popup-content label {
+            color: #888 !important;
+            font-size: 12px !important;
+            margin-bottom: 8px !important;
+            display: block !important;
+        }
+
+        .flag-popup-content select {
+            background: #1E1E1E !important;
+            border: 1px solid #333 !important;
+            color: #fff !important;
+            padding: 8px 12px !important;
+            font-size: 13px !important;
+            width: 100% !important;
+            border-radius: 0 !important;
+        }
+
+        .flag-popup-content select:focus {
+            outline: none !important;
+            border-color: #555 !important;
+        }
+
+        .flag-popup-buttons {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+        }
+
+        .flag-popup-buttons .btn {
+            background: #1E1E1E !important;
+            border: 1px solid #333 !important;
+            color: #fff !important;
+            padding: 8px 16px !important;
+            font-size: 13px !important;
+            cursor: pointer !important;
+            width: 100% !important;
+            text-align: center !important;
+            border-radius: 0 !important;
+        }
+
+        .flag-popup-buttons .btn:hover {
+            background: #2a2a2a !important;
+        }
+
+        .flag-popup-buttons .btn-danger {
+            background: #8B0000 !important;
+            border-color: #A52A2A !important;
+        }
+
+        .flag-popup-buttons .btn-danger:hover {
+            background: #A52A2A !important;
+        }
+
+        .comment a[href*="/user/"] {
+            text-decoration: none;
+        }
+
+        .comment a[href*="/user/"]:hover {
+            text-decoration: none;
+        }
+
+        #like-paste,
+        #dislike-paste,
+        a.like-comment,
+        a.dislike-comment {
+            color: white;
+        }
+
+        #like-paste:hover,
+        #dislike-paste:hover,
+        .like-comment:hover,
+        div.like-dislike-comment .dislike-comment:hover {
+            color: rgb(161, 161, 161) !important;
+        }
+
+        a.button {
+            font-size: 14px !important;
+            text-transform: none !important;
+        }
+
+        .sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 300px;
+            height: 100%;
+            background-color: #2c3e50;
+            transition: transform 0.3s ease;
+            transform: translateX(0);
+            z-index: 1000;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(100%);
+        }
+
+        .show-sidebar {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1001;
+            cursor: pointer;
+            transition: right 0.3s ease;
+            background-color: #2c3e50;
+            padding: 10px;
+            color: white !important;
+            font-weight: bold !important;
+            font-size: 18px;
+        }
+
+        .show-sidebar.sidebar-open {
+            right: 310px;
+        }
+
+        .show-container {
+            transition: margin-right 0.3s ease;
+            margin-right: 300px;
+            padding-left: 20px;
+            overflow-x: auto;
+            min-height: 100vh;
+        }
+
+        .show-container.full-width {
+            margin-right: 0;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .show-container {
+                margin-right: 0;
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            
+            .show-sidebar {
+                right: 10px;
+            }
+            
+            .show-sidebar.sidebar-open {
+                right: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            .sidebar-logo pre {
+                font-size: 8px !important;
+                line-height: 1.2;
+                margin: 0;
+                padding: 5px;
+                white-space: pre;
+                overflow-x: hidden;
+            }
+            
+            .show-sidebar {
+                right: 5px;
+                top: 5px;
+                padding: 8px;
+                font-size: 16px;
+            }
+            
+            .show-sidebar.sidebar-open {
+                right: 5px;
+            }
+            
+            .show-container {
+                padding-left: 5px;
+                padding-right: 5px;
+            }
+        }
+    </style>
+
+</head>
+
+<body class="bin" style="overflow-x: hidden;">
+    <div class="wrapper">
+        <div class="table">
+
+            <a class="show-sidebar" onclick="showHideSideBar()">
+                ☰
+            </a>
+
+            <div id="showhide-sidebar" class="sidebar">
+                <a class="sidebar-logo" href="{{ url_for('index') }}">
+                    <pre style="font-size: 10px; white-space: pre; overflow-x: hidden; margin: 0; padding: 5px;">
+    ██████╗  █████╗ ██████╗ ██████╗ ██╗███╗   ██╗
+    ██╔══██╗██╔══██╗██╔══██╗██╔══██╗██║████╗  ██║
+    ██████╔╝███████║██████╔╝██████╔╝██║██╔██╗ ██║
+    ██╔══██╗██╔══██║██╔══██╗██╔══██╗██║██║╚██╗██║
+    ██║  ██║██║  ██║██║  ██║██████╔╝██║██║ ╚████║
+    ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚═╝╚═╝  ╚═══╝
+                    </pre>
+                </a>
+
+                <div class="options" style="padding-top:3px;">
+                    <div class="paste-properties">
+                    </div>
+
+                    <p>
+                        <span style="font-weight:bold; color: white;">
+                            Title:
+                        </span>
+                        <span style="float: right;">
+                            {{ filename }}
+                        </span>
+                    </p>
+                    <p>
+                        <span style="font-weight:bold; color: white;">
+                            By:
+                        </span>
+                        <span style="float: right;">
+                            {{ ownerpast }}
+                        </span>
+                    </p>
+                    <p>
+                        <span style="font-weight:bold; color: white;">
+                            Added:
+                        </span>
+                        <span style="float: right;" title="{{ creation_date }} {{ creation_time }}">
+                            {{ (creation_date ~ ' ' ~ creation_time) | naturaltime }}
+                        </span>
+                    </p>
+                    <p>
+                        <span style="font-weight:bold; color: white;">
+                            Views:
+                        </span>
+                        <span style="float: right;">
+                            {{ view }}
+                        </span>
+                    </p>
+                    <p>
+                        <span style="font-weight:bold; color: white;">
+                            Comments:
+                        </span>
+                        <span style="float: right;">
+                            {{ comments|length }}
+                        </span>
+                    </p>
+
+                </div>
+
+                <div class="options" id="btns">
+                    <ul>
+                        <li><a href="{{ url_for('new_paste') }}" class="btn new">New</a></li>
+                        <li><a href="{{ url_for('post_raw', file=url_name) }}" class="btn new">Raw</a></li>
+                        <li><a href="{{ url_for('tos') }}" class="btn new">Terms of Service</a></li>
+                
+                        {% if can_edit %}
+                            <li><a href="{{ url_for('edit_paste', file=url_name) }}" class="btn new">Edit</a></li>
+                        {% endif %}
+
+                        {% if status == 'root' or status == 'admin' or status == 'manager' %}
+                            <li>
+                                <form action="{{ url_for('toggle_pinned', paste_name=url_name) }}" method="POST" onsubmit="return confirm('Are you sure you want to toggle the pinned status?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn new">{{ 'Unpin' if is_pinned == 'True' else 'Pin' }} Paste</button>
+                                </form>
+                            </li>
+                        {% endif %}
+
+                        {% if status == 'root' or status == 'admin' or status == 'manager' or status == 'mod' or status == 'council' or status == 'helper' %}
+                            <li>
+                                <button type="button" class="btn new" onclick="openFlagPopup()">Flag Paste</button>
+                            </li>
+                        {% endif %}
+
+                    </ul>
+                </div>
+                
+                {% if not comments_disabled %}
+                <div class="options" id="cmntsctn">
+                    <ul>
+                        
+                        {% if username %}
+                            <li><p style="width: 100%; color: #b7b7b7; margin: 0;"><b>Username:</b> {{ username }} - <a class="cmt-name-link" href="/logout">(Logout)</a></p></li>
+                        {% else %}
+                            <li><p style="width: 100%; color: #b7b7b7; margin: 0;"><b>Username:</b> Anonymous - <a class="cmt-name-link" href="/login">(Login)</a></p></li>
+                        {% endif %}
+                        
+                        {% if error %} 
+                            <p class="error" style="color: red; padding: 0px 0px 10px 0px; text-align: center; margin: 0;">{{ error }}</p> 
+                        {% endif %} 
+
+                        <p class="error" style="color: red; padding: 0; margin: 0;"></p>
+                        <form id="register-form" action="{{ url_for('add_comment', file=url_name) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <li>
+                                <textarea id="comment" name="comment" placeholder="Your comment" maxlength="100" required></textarea>
+                            </li>
+                            <div class="g-recaptcha" data-theme="dark" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
+                            <button type="submit" class="btn raw" id="create" style="cursor: pointer;">Submit Comment</button>
+                        </form>
+                    </ul>
+                </div>
+                {% else %}
+                <div class="options" id="cmntsctn">
+                    <ul>
+                        <li><p style="width: 100%; color: #b7b7b7; margin: 0; text-align: center;"><b>Comments are disabled for this paste.</b></p></li>
+                    </ul>
+                </div>
+                {% endif %}
+
+                <div class="comment-container">
+                    {% if comments %}
+                        {% for comment in comments %}
+                            <div class="options">
+                                <div class="comment b-comments b-comment" style="padding-left: 10px; position: relative;">
+                                    <b>
+                                        {% if comment.loginstatus == 'anonymous' %}
+                                            {{ comment.login }}
+                                        {% else %}
+                                            {% if comment.loginstatus == 'root' %}
+                                                {% set custom_color = get_username_color(comment.login) %}
+                                                {% set style = 'color: ' ~ (custom_color or '#ffffff') ~ '; font-weight: bold;' %}
+                                                {% set status_style = 'color: #ffffff; text-decoration: none;' %}
+                                            {% elif comment.loginstatus == 'admin' %}
+                                                {% set custom_color = get_username_color(comment.login) %}
+                                                {% set style = 'color: ' ~ (custom_color or '#ff0000') ~ '; font-weight: bold; background-image: url(' ~ url_for('static', filename='files/red.gif') ~ ');' %}
+                                                {% set status_style = 'color: #ff0000; text-decoration: none; background-image: url(' ~ url_for('static', filename='files/red.gif') ~ ');' %}
+                                            {% elif comment.loginstatus == 'manager' %}
+                                                {% set custom_color = get_username_color(comment.login) %}
+                                                {% set style = 'color: ' ~ (custom_color or '#BB71E4') ~ '; font-weight: bold; background-image: url(' ~ url_for('static', filename='files/purple.gif') ~ ');' %}
+                                                {% set status_style = 'color: #BB71E4; text-decoration: none; background-image: url(' ~ url_for('static', filename='files/purple.gif') ~ ');' %}
+                                            {% elif comment.loginstatus == 'mod' %}
+                                                {% set custom_color = get_username_color(comment.login) %}
+                                                {% set style = 'color: ' ~ (custom_color or '#39FF14') ~ '; font-weight: bold;' %}
+                                                {% set status_style = 'color: #39FF14; text-decoration: none;' %}
+                                            {% elif comment.loginstatus == 'council' %}
+                                                {% set custom_color = get_username_color(comment.login) %}
+                                                {% set style = 'color: ' ~ (custom_color or '#87cefa') ~ '; font-weight: bold;' %}
+                                                {% set status_style = 'color: #87cefa; text-decoration: none;' %}
+                                            {% elif comment.loginstatus == 'helper' %}
+                                                {% set custom_color = get_username_color(comment.login) %}
+                                                {% set style = 'color: ' ~ (custom_color or '#5555FF') ~ '; font-weight: bold;' %}
+                                                {% set status_style = 'color: #5555FF; text-decoration: none;' %}
+                                            {% elif comment.loginstatus == 'clique' %}
+                                                {% set custom_color = get_username_color(comment.login) %}
+                                                {% set style = 'color: ' ~ (custom_color or '#095699') ~ '; font-weight: bold;' %}
+                                                {% set status_style = 'color: #095699; text-decoration: none;' %}
+                                            {% elif comment.loginstatus == 'rich' %}
+                                                {% set custom_color = get_username_color(comment.login) %}
+                                                {% set style = 'color: ' ~ (custom_color or '#FFD700') ~ '; font-weight: bold; background-image: url(' ~ url_for('static', filename='files/gold.gif') ~ ');' %}
+                                                {% set status_style = 'color: #FFD700; text-decoration: none; background-image: url(' ~ url_for('static', filename='files/gold.gif') ~ ');' %}
+                                            {% elif comment.loginstatus == 'criminal' %}
+                                                {% set custom_color = get_username_color(comment.login) %}
+                                                {% set style = 'color: ' ~ (custom_color or '#780A48') ~ '; font-weight: bold;' %}
+                                                {% set status_style = 'color: #780A48; text-decoration: none;' %}
+                                            {% elif comment.loginstatus == 'vip' %}
+                                                {% set custom_color = get_username_color(comment.login) %}
+                                                {% set style = 'color: ' ~ (custom_color or '#9B318E') ~ '; font-weight: bold;' %}
+                                                {% set status_style = 'color: #9B318E; text-decoration: none;' %}
+                                            {% elif comment.loginstatus == 'user' %}
+                                                {% set custom_color = get_username_color(comment.login) %}
+                                                {% set style = 'color: ' ~ (custom_color or '#2a9fd6') ~ ';' %}
+                                                {% set status_style = 'color: #2a9fd6; text-decoration: none;' %}
+                                            {% endif %}
+
+                                            <a href="{{ url_for('user', username=comment.login) }}" target="_self" style="{{ style }}">
+                                                {{ comment.login }}
+                                            </a>
+                                            {% if comment.loginstatus != 'user' %}
+                                            <a href="{{ url_for('user', username=comment.login) }}" target="_self" style="{{ status_style }}">
+                                                [{{ comment.loginstatus | capitalize }}]
+                                            </a>
+                                            {% endif %}
+                                        {% endif %}
+                                    </b> - 
+                                    <p title="{{ comment.date }}" style="display: inline;">
+                                        {{ comment.date | comment_naturaltime }}
+                                    </p>
+
+
+
+                                    <br>
+                                    <div class="b-content">{{ comment.comment }}</div>
+                                    <br>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                    {% endif %}
+                </div>                
+
+                <div class="options r-hide" id="tos-display">
+                    <p style="margin-top: 0;color: white;">
+                        Please note that all posted information is publicly available and must follow our <a href="/tos" style="text-decoration: underline;">TOS.</a>
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="show-container">
+                <pre id="dox-content-text" style="color: white; margin: 0; white-space: pre-wrap; word-wrap: break-word; min-width: max-content; line-height: 1.0em; font-family: Monaco, 'Bitstream Vera Sans Mono', 'Lucida Console', Terminal, monospace; font-size: 12px;">{{ file_content|linkify }}</pre>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var commentTextarea = document.getElementById('comment');
+            
+            commentTextarea.addEventListener('input', function () {
+                var value = commentTextarea.value;
+                commentTextarea.value = value.replace(/[^a-zA-Z0-9\s.,!?;:'"()-]/g, '');
+            });
+
+            document.getElementById('register-form').addEventListener('submit', function(event) {
+                var comment = commentTextarea.value;
+
+                if (comment.length < 3) {
+                    event.preventDefault();
+                    displayError('Comment must be at least 3 characters long.');
+                } else if (comment.length > 100) {
+                    event.preventDefault();
+                    displayError('Comment must be less than or equal to 100 characters.');
+                }
+
+                var regex = /^[a-zA-Z0-9\s.,!?;:'"()-]+$/;
+                if (!regex.test(comment)) {
+                    event.preventDefault();
+                    displayError('Comment can only contain letters (a-z), numbers (0-9), spaces, and basic punctuation (.,!?;:\'"()-).');
+                }
+            });
+
+            function displayError(message) {
+                var errorElement = document.querySelector('.error');
+                if (!errorElement) {
+                    errorElement = document.createElement('p');
+                    errorElement.className = 'error';
+                    errorElement.style.color = 'red';
+                    errorElement.style.padding = '0px 0px 10px 0px';
+                    errorElement.style.textAlign = 'center';
+                    errorElement.style.margin = '0';
+                    var form = document.getElementById('register-form');
+                    form.parentNode.insertBefore(errorElement, form);
+                }
+                errorElement.textContent = message;
+            }
+        });
+
+        function showHideSideBar() {
+            var sidebar = document.getElementById("showhide-sidebar");
+            var sidebarButton = document.querySelector(".show-sidebar");
+
+            if (sidebar.classList.contains("hidden")) {
+                sidebar.classList.remove("hidden");
+                sidebarButton.classList.remove("hidden");
+                sidebarButton.style.right = "300px";
+            } else {
+                sidebar.classList.add("hidden");
+                sidebarButton.classList.add("hidden");
+                sidebarButton.style.right = "0px";
+            }
+        }
+
+        function updateLayout() {
+            var sidebar = document.getElementById("sidebar");
+            var sidebarButton = document.querySelector(".show-sidebar");
+            var showContainer = document.querySelector(".show-container");
+            
+            sidebarButton.classList.remove("hidden");
+            
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add("hidden");
+                sidebarButton.classList.remove("sidebar-open");
+                showContainer.classList.add("full-width");
+            } else {
+                sidebar.classList.remove("hidden");
+                sidebarButton.classList.add("sidebar-open");
+                showContainer.classList.remove("full-width");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var sidebar = document.getElementById("showhide-sidebar");
+            var sidebarButton = document.querySelector(".show-sidebar");
+            sidebar.classList.remove("hidden");
+            sidebarButton.classList.remove("hidden");
+            sidebarButton.style.right = "300px";
+        });
+
+        window.addEventListener('resize', function() {
+            var sidebar = document.getElementById("sidebar");
+            var sidebarButton = document.querySelector(".show-sidebar");
+            var showContainer = document.querySelector(".show-container");
+            
+            sidebarButton.classList.remove("hidden");
+            
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add("hidden");
+                sidebarButton.classList.remove("sidebar-open");
+                showContainer.classList.add("full-width");
+            } else {
+                sidebar.classList.remove("hidden");
+                sidebarButton.classList.add("sidebar-open");
+                showContainer.classList.remove("full-width");
+            }
+        });
+
+        function openFlagPopup() {
+            document.getElementById('flagPopup').classList.add('show');
+        }
+
+        function closeFlagPopup() {
+            document.getElementById('flagPopup').classList.remove('show');
+        }
+
+        function submitFlagForm() {
+            const reason = document.getElementById('deletion_reason').value;
+            if (!reason) {
+                alert('Please select a reason for deletion.');
+                return;
+            }
+            
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ url_for("delete_paste", paste_name=url_name) }}';
+            
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = 'csrf_token';
+            csrfToken.value = '{{ csrf_token() }}';
+            
+            const reasonInput = document.createElement('input');
+            reasonInput.type = 'hidden';
+            reasonInput.name = 'deletion_reason';
+            reasonInput.value = reason;
+            
+            form.appendChild(csrfToken);
+            form.appendChild(reasonInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function closeFlagPopupOutside(event) {
+            if (event && event.target.id === 'flagPopup') {
+                const popup = document.getElementById('flagPopup');
+                popup.classList.remove('show');
+            }
+        }
+    </script>
+
+    <div class="flag-popup" id="flagPopup" onclick="closeFlagPopupOutside(event)">
+        <div class="flag-popup-content">
+            <h3>Flag Paste for Deletion</h3>
+            <p>Please select a reason for flagging this paste for deletion:</p>
+            
+            <div class="form-group">
+                <label for="deletion_reason">Reason:</label>
+                <select id="deletion_reason" name="deletion_reason" required>
+                    <option value="">Select a reason...</option>
+                    <option value="Under 15">Under 15</option>
+                    <option value="Spam">Spam</option>
+                    <option value="CSAM/CP">CSAM/CP</option>
+                    <option value="Harassment">Harassment</option>
+                    <option value="Direct Threats">Direct Threats</option>
+                    <option value="Malware/Scam">Malware/Scam</option>
+                    <option value="Duplicate content">Duplicate content</option>
+                    <option value="Low quality content">Low quality content</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            
+            <div class="flag-popup-buttons">
+                <button type="button" class="btn" onclick="closeFlagPopup()">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="submitFlagForm()">Submit Flag</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

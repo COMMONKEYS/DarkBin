@@ -1,0 +1,655 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upgrades | Rarbin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='legacy/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='files/dropdown.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='files/bootstrap.min.js') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='files/doxbin.css') }}">
+    <link rel="canonical" href="https://rarbin.com/upgrades"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            min-height: calc(100vh - 88px);
+            display: flex;
+            align-items: center;
+        }
+
+        .upgrade-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            width: 100%;
+        }
+
+        .upgrade-card {
+            border: 1px solid #222;
+            padding: 15px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .upgrade-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #222;
+        }
+
+        .upgrade-name {
+            font-size: 2.2rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            color: #fff;
+        }
+
+        .vip-title { color: #9B318E; }
+        .criminal-title { color: #780A48; }
+        .rich-title { color: #FFD700; }
+        .namecolor-title { color: #fff; }
+
+        .upgrade-price {
+            font-size: 2.2rem;
+            color: #fff;
+            font-weight: 300;
+        }
+
+        .perks-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+        }
+
+        .perk-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+            color: #fff;
+            font-size: 1.2rem;
+            letter-spacing: 0.2px;
+        }
+
+        .perk-value {
+            text-align: right;
+        }
+
+        .perk-value.yes {
+            color: green;
+        }
+
+        .perk-value.no {
+            color: red;
+        }
+
+        .perk-value i.material-icons {
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .perk-value.vip { 
+            color: #9B318E;
+            font-weight: bold;
+        }
+        .perk-value.vip.paste-highlight {
+            background-color: #2D0A21;
+            background-image: none;
+        }
+        .perk-value.criminal { 
+            color: #780A48;
+            font-weight: bold;
+        }
+        .perk-value.criminal.paste-highlight {
+            background-color: #2B021B;
+            background-image: none;
+        }
+        .perk-value.rich { 
+            color: #FFD700;
+            background-image: url("{{ url_for('static', filename='files/gold.gif') }}");
+            font-weight: bold;
+        }
+        .perk-value.rich.paste-highlight {
+            background-color: #2b200d;
+            background-image: none;
+        }
+        .perk-value.namecolor { 
+            color: gold;
+            background-image: url("{{ url_for('static', filename='files/gold.gif') }}");
+        }
+
+        .purchase-btn {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            margin-top: 15px;
+            background: #222;
+            color: #fff;
+            text-align: center;
+            text-decoration: none;
+            border: 0px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .purchase-btn:hover {
+            background: #111;
+        }
+
+        .purchase-btn:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 3px;
+            margin-top: 10px;
+        }
+
+        .color-box {
+            aspect-ratio: 1;
+            border: 1px solid #222;
+            cursor: pointer;
+        }
+
+        .preview-name {
+            color: inherit;
+        }
+
+        .price-info {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        .price-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .currency-option:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading-spinner {
+            display: none;
+            margin: 10px auto;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #333;
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        @media screen and (max-width: 768px) {
+            .main-container {
+                padding: 20px 10px;
+                min-height: auto;
+                align-items: flex-start;
+            }
+            
+            .upgrade-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px 10px;  
+            }
+
+            .upgrade-card {
+                padding: 10px;
+                margin-bottom: 5px;
+            }
+
+            .upgrade-title {
+                margin-bottom: 10px;
+                padding-bottom: 5px;
+            }
+
+            .upgrade-name {
+                font-size: 1rem;
+            }
+
+            .upgrade-price {
+                font-size: 1rem;
+            }
+
+            .perk-item {
+                font-size: 0.75rem;
+                margin-bottom: 4px;
+            }
+
+            .purchase-btn {
+                padding: 6px;
+                margin-top: 10px;
+                font-size: 0.8rem;
+            }
+
+            .upgrade-card:nth-child(3),
+            .upgrade-card:nth-child(4) {
+                margin-top: 10px;
+            }
+
+            .color-grid {
+                gap: 2px;
+            }
+
+            .color-box {
+                min-width: 0;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .upgrade-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 25px 8px;  
+            }
+
+            .main-container {
+                padding: 15px 8px;
+            }
+
+            .upgrade-card {
+                padding: 8px;
+            }
+
+            .perk-item {
+                font-size: 0.7rem;
+            }
+
+            .color-grid {
+                gap: 1px;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #111;
+            padding: 20px;
+            border: 1px solid #222;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #fff;
+            text-align: center;
+        }
+
+        .currency-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .currency-option {
+            background: #222;
+            border: 0;
+            color: #fff;
+            padding: 10px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .currency-option:hover {
+            background: #333;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #666;
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        .error-message {
+            padding: 12px;
+            color: #888;
+            text-align: center;
+            margin: 15px 0;
+            display: none;
+            font-size: 13px;
+        }
+
+        .error-message a {
+            color: #28A9E8;
+            text-decoration: none;
+        }
+
+        .error-message a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<main>
+        <div class="main-container">
+            <div class="upgrade-grid">
+                <div class="upgrade-card">
+                    <div class="upgrade-title">
+                        <span class="upgrade-name vip-title">VIP</span>
+                        <span class="upgrade-price">$15</span>
+                    </div>
+                    <ul class="perks-list">
+                        <li class="perk-item">
+                            <span>Preview</span>
+                            <span class="perk-value vip"><span class="preview-name" style="color: ;">{{ session.get('username', 'Anonymous') }}</span> [VIP]
+                        </li>
+                        <li class="perk-item">
+                            <span>Color</span>
+                            <span class="perk-value vip">Light purple</span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Paste highlight</span>
+                            <span class="perk-value vip paste-highlight">Light purple</span>
+                        </li>
+                        <li class="perk-item">
+                            <span>.GIF profile picture</span>
+                            <span class="perk-value yes"><i class="material-icons">check</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Instant paste edits</span>
+                            <span class="perk-value yes"><i class="material-icons">check</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Unlist your own pastes</span>
+                            <span class="perk-value no"><i class="material-icons">clear</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Private your own pastes</span>
+                            <span class="perk-value no"><i class="material-icons">clear</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Password protected pastes</span>
+                            <span class="perk-value no"><i class="material-icons">clear</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Profile music</span>
+                            <span class="perk-value no"><i class="material-icons">clear</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Username changes</span>
+                            <span class="perk-value">1</span>
+                        </li>
+                    </ul>
+                    <button class="purchase-btn">Purchase</button>
+                </div>
+    
+                <div class="upgrade-card">
+                    <div class="upgrade-title">
+                        <span class="upgrade-name criminal-title">Criminal</span>
+                        <span class="upgrade-price">$25</span>
+                    </div>
+                    <ul class="perks-list">
+                        <li class="perk-item">
+                            <span>Preview</span>
+                            <span class="perk-value criminal"><span class="preview-name" style="color: ;">{{ session.get('username', 'Anonymous') }}</span> [Criminal]
+                        </li>
+                        <li class="perk-item">
+                            <span>Color</span>
+                            <span class="perk-value criminal">Dark purple</span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Paste highlight</span>
+                            <span class="perk-value criminal paste-highlight">Dark purple</span>
+                        </li>
+                       <li class="perk-item">
+                            <span>.GIF profile picture</span>
+                            <span class="perk-value yes"><i class="material-icons">check</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Instant paste edits</span>
+                            <span class="perk-value yes"><i class="material-icons">check</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Unlist your own pastes</span>
+                            <span class="perk-value yes"><i class="material-icons">check</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Private your own pastes</span>
+                            <span class="perk-value yes"><i class="material-icons">check</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Password protected pastes</span>
+                            <span class="perk-value no"><i class="material-icons">clear</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Profile music</span>
+                            <span class="perk-value no"><i class="material-icons">clear</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Username changes</span>
+                            <span class="perk-value">2</span>
+                        </li>
+                    </ul>
+                    <button class="purchase-btn">Purchase</button>
+                </div>
+    
+                <div class="upgrade-card">
+                    <div class="upgrade-title">
+                        <span class="upgrade-name rich-title">Rich</span>
+                        <span class="upgrade-price">$40</span>
+                    </div>
+                    <ul class="perks-list">
+                        <li class="perk-item">
+                            <span>Preview</span>
+                            <span class="perk-value rich"><span class="preview-name" style="color: ;">{{ session.get('username', 'Anonymous') }}</span> [Rich]
+                        </li>
+                        <li class="perk-item">
+                            <span>Color</span>
+                            <span class="perk-value rich">Sparkling gold</span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Paste highlight</span>
+                            <span class="perk-value rich paste-highlight">Gold</span>
+                        </li>
+                        <li class="perk-item">
+                            <span>.GIF profile picture</span>
+                            <span class="perk-value yes"><i class="material-icons">check</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Instant paste edits</span>
+                            <span class="perk-value yes"><i class="material-icons">check</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Unlist your own pastes</span>
+                            <span class="perk-value yes"><i class="material-icons">check</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Private your own pastes</span>
+                            <span class="perk-value yes"><i class="material-icons">check</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Password protected pastes</span>
+                            <span class="perk-value yes"><i class="material-icons">check</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Profile music</span>
+                            <span class="perk-value yes"><i class="material-icons">check</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Username changes</span>
+                            <span class="perk-value">3</span>
+                        </li>
+                    </ul>
+                    <button class="purchase-btn">Purchase</button>
+                </div>
+
+                <div class="upgrade-card">
+                    <div class="upgrade-title">
+                        <span class="upgrade-name namecolor-title">Change Color</span>
+                        <span class="upgrade-price">$10</span>
+                    </div>
+                    <ul class="perks-list">
+                        <li class="perk-item">
+                            <span title="Gives you the ability to change your Color">Ability to change color</span>
+                            <span class="perk-value yes"><i class="material-icons">check</i></span>
+                        </li>
+                        <li class="perk-item">
+                            <span>Amount of colors</span>
+                            <span class="perk-value">20</span>
+                        </li>
+                    </ul>
+                    <div class="color-grid">
+                        <div class="color-box" style="background: #BB71E4;" onclick="updatePreviewColors('#BB71E4')"></div>
+                        <div class="color-box" style="background: #4B2E83;" onclick="updatePreviewColors('#4B2E83')"></div>
+                        <div class="color-box" style="background: #FEC8D8;" onclick="updatePreviewColors('#FEC8D8')"></div>
+                        <div class="color-box" style="background: #BB1E64;" onclick="updatePreviewColors('#BB1E64')"></div>
+                        <div class="color-box" style="background: #FFFFFF;" onclick="updatePreviewColors('#FFFFFF')"></div>
+                        <div class="color-box" style="background: #365DDA;" onclick="updatePreviewColors('#365DDA')"></div>
+                        <div class="color-box" style="background: #F96D31;" onclick="updatePreviewColors('#F96D31')"></div>
+                        <div class="color-box" style="background: #FFFE71;" onclick="updatePreviewColors('#FFFE71')"></div>
+                        <div class="color-box" style="background: #B83C26;" onclick="updatePreviewColors('#B83C26')"></div>
+                        <div class="color-box" style="background: #C5C6D3;" onclick="updatePreviewColors('#C5C6D3')"></div>
+                        <div class="color-box" style="background: #94FAAC;" onclick="updatePreviewColors('#94FAAC')"></div>
+                        <div class="color-box" style="background: #964B00;" onclick="updatePreviewColors('#964B00')"></div>
+                        <div class="color-box" style="background: #000080;" onclick="updatePreviewColors('#000080')"></div>
+                        <div class="color-box" style="background: #FF69B4;" onclick="updatePreviewColors('#FF69B4')"></div>
+                        <div class="color-box" style="background: #FFD580;" onclick="updatePreviewColors('#FFD580')"></div>
+                        <div class="color-box" style="background: #601EF9;" onclick="updatePreviewColors('#601EF9')"></div>
+                        <div class="color-box" style="background: #30D5C8;" onclick="updatePreviewColors('#30D5C8')"></div>
+                        <div class="color-box" style="background: #9999FF;" onclick="updatePreviewColors('#9999FF')"></div>
+                        <div class="color-box" style="background: #4C4CFF;" onclick="updatePreviewColors('#4C4CFF')"></div>
+                        <div class="color-box" style="background: #004C00;" onclick="updatePreviewColors('#004C00')"></div>
+                    </div>
+                    <button class="purchase-btn">Purchase</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="currencyModal" class="modal" onclick="if(event.target === this) closeModal()">
+            <div class="modal-content">
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+                <div class="modal-title">Select Payment Currency</div>
+                <div class="currency-grid">
+                    <button class="currency-option" onclick="selectCurrency('btc')">Bitcoin</button>
+                    <button class="currency-option" onclick="selectCurrency('eth')">Ethereum</button>
+                    <button class="currency-option" onclick="selectCurrency('xmr')">Monero</button>
+                </div>
+                <div id="loadingSpinner" class="loading-spinner"></div>
+                <div id="errorMessage" class="error-message">
+                    Message <a href="https://t.me/hologramic" target="_blank">@Hologramic</a> on Telegram for manual processing or try selecting another currency.
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function updatePreviewColors(color) {
+                document.querySelectorAll('.preview-name').forEach(name => {
+                    name.style.color = color;
+                });
+            }
+        </script>
+        <script>
+            let currentPerk = null;
+
+            function showModal(perk) {
+                currentPerk = perk;
+                document.getElementById('currencyModal').style.display = 'block';
+                document.getElementById('errorMessage').style.display = 'none';
+            }
+
+            function closeModal() {
+                document.getElementById('currencyModal').style.display = 'none';
+                currentPerk = null;
+            }
+
+            function setLoading(loading) {
+                const buttons = document.querySelectorAll('.currency-option');
+                const spinner = document.getElementById('loadingSpinner');
+                const closeBtn = document.querySelector('.modal-close');
+                
+                buttons.forEach(btn => btn.disabled = loading);
+                spinner.style.display = loading ? 'block' : 'none';
+                closeBtn.style.display = loading ? 'none' : 'block';
+            }
+
+            async function selectCurrency(currency) {
+                try {
+                    document.getElementById('errorMessage').style.display = 'none';
+                    setLoading(true);
+                    const response = await fetch(`/api/createOrder?perk=${currentPerk}&currency=${currency}`);
+                    const data = await response.json();
+                    
+                    if (typeof data === 'string') {
+                        window.location.href = `/upgrades/${data}`;
+                    } else if (!data.success) {
+                        setLoading(false);
+                        document.getElementById('errorMessage').style.display = 'block';
+                    }
+                } catch (error) {
+                    setLoading(false);
+                    document.getElementById('errorMessage').style.display = 'block';
+                }
+            }
+
+            document.querySelectorAll('.purchase-btn').forEach(btn => {
+                if (!btn.disabled) {
+                    btn.onclick = function() {
+                        const card = this.closest('.upgrade-card');
+                        let perk;
+                        
+                        if (card.querySelector('.vip-title')) perk = 'vip';
+                        else if (card.querySelector('.criminal-title')) perk = 'criminal';
+                        else if (card.querySelector('.rich-title')) perk = 'rich';
+                        else perk = 'changeusernamecolor';
+                        
+                        showModal(perk);
+                    };
+                }
+            });
+        </script>
+    </main>
+</body>
+</html>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/static/legacy/index.css">
+        <link rel="stylesheet" href="/static/files/dropdown.css">
+        <script src="/static/files/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="/static/files/doxbin.css">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="canonical" href="https://rarbin.com/tos"/>
+        <title>TOS | Rarbin</title>
+    </head>
+    <style>
+        .admin-text {
+            color: red;
+            font-weight: bold;
+        }
+        p.faq b{
+           margin-left: -3px;
+        }
+
+        details summary { 
+        cursor: pointer;
+        }
+        @keyframes  details-show {
+        from {
+            opacity:0;
+            transform: var(--details-translate, translateY(1em));
+        }
+        }
+        details[open] > *:not(summary) {
+        animation: details-show 500ms ease-in-out;
+        }
+
+        .contact-link {
+            color: red;
+            font-weight: bold;
+            text-decoration: none;
+        }
+    
+        .contact-link:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+{% endblock %}
+
+{% block bottom %}
+    <div class="container">
+        <div style="margin-top: 70px">
+            <div style="text-align: center">
+                Here at Rarbin, we supply users with the ability to 
+upload text information without the fear of censorship. Most pastes 
+won't come down without a court order. What this means is that if your 
+info goes up, it's not coming down unless it's inaccurate, breaks our 
+TOS or we receive a court order from our server hosted country.
+            </div>
+            <br>
+            <span style="font-size: 12px;">(Click a heading to expand it)</span>
+            <details open=""><summary><h6 style="margin: 7px 0 0 0;font-weight:bold;">What is Rarbin?</h6></summary>
+            <p style="margin-left:10px;">
+                Rarbin is a document sharing and publishing website for 
+text-based information. There are no limitations on what info you can 
+post as long as it's not spam, child explicit material or violating 
+hosting country jurisdictional laws. For example, kiddie porn links, 
+your mothers creditcard and any support of terrorism/threats of physical
+ violence is not allowed here.<br><br>
+ Rarbin is not your personal army, nor your personal slam page.</p></details>
+            <details open=""><summary><h6 style="margin: 20px 0 0 0;font-weight:bold;">User information:</h6></summary>
+            <p style="margin-left:10px;">
+                The only information we keep is the information you give
+ us upon registration (email address &amp; hashed password).<br>
+                <br>IP addresses are not retained in the access logs (In
+ fact, even if someone tcpdumped everything, it would just show a bunch 
+of traffic coming from 127.0.0.1)
+                <br>
+                <br>Sample log entry:
+                <br>127.0.0.1 - - [12/Jul/2025 11:58:10] "GET / HTTP/1.1" 200 -
+                <br></p></details>
+            <details><summary><h6 style="margin: 20px 0 0 0;font-weight:bold;">Content Guidelines:</h6></summary>
+            <p style="margin-left:10px;">
+                Rarbin provides a platform for users to upload text information without the fear of censorship. All content hosted on Rarbin is subject to removal under certain<br>
+                conditions, including but not limited to, violations of this policy or the issuance of a court order in accordance with the applicable laws where Rarbin operates<br>
+                Rarbin reserves the right, at its sole discretion, to remove any content from the platform for any reason, including but not limited to violations of this policy.<br>
+                <br>
+                The following content is prohibited on our platform:<br>
+                - Personal information of individuals under the age of 15<br>
+                - Links to explicit material involving minors<br>
+                - Dox requests or any form of targeted harassment<br>
+                - Spam or malicious content<br>
+                - Direct threats of physical harm, terrorism, or swatting<br>
+                - Reposting identical or low quality content<br>
+                <br>
+                To report violations of this policy, please contact us via Telegram at <a href="https://t.me/hologramic" class="contact-link">@hologramic</a>.
+                <br>
+                Law enforcement inquiries must be directed to <a href="mailto:legal@rarbin.com" class="contact-link">legal@rarbin.com</a> in accordance with our <a href="/support" class="contact-link">Law Enforcement Request Guidelines</a>. All emails received from anyone other than authorized law enforcement officials or attorneys representing law enforcement agencies will be directed to our Telegram support.</p></details>
+            <details><summary><h6 style="margin: 20px 0 0 0;font-weight:bold;">Legal:</h6></summary>
+                <p style="margin-left:10px;">
+                    Rarbin and its administrators adhere to all applicable laws within the jurisdictions in which the platform operates. Rarbin assumes no responsibility for the content uploaded by its users.<br>
+                    <br>
+                    - Rarbin cannot be held liable for any content uploaded by users in adherence to <a href="https://en.wikipedia.org/wiki/Section_230" class="contact-link">Section 230 of the Communications Act of 1934</a>, which provides immunity from liability for user-generated content published by third parties.<br>
+                    - The platform does not endorse, participate in, or facilitate any form of harassment, cyberbullying, or threats of violence.<br>
+                    - Any content that directly threatens, incites harm, or is in violation of applicable law will be removed immediately upon review.<br>
+                </p></details>
+            <details><summary><h6 style="margin: 20px 0 0 0;padding:0;font-weight:bold;">FAQ:</h6></summary>
+            <p class="faq" style="margin: 0;padding-left:13px;">
+                <b><u>Why was my paste removed?</u></b><br> Pastes can be removed for a number of reasons. Please read above for the list of content that is not allowed on our service.<br><br>
+                <b><u>How long will valid pastes stay up?</u></b><br> Forever (as long as the service stays up, or the pastes db will be handed to the next owner)<br><br>
+                <b><u>How do I get a paste pinned?</u></b><br> Contact us on Telegram for pricing and/or reasoning.<br><br>
+                <b><u>How can I contact Rarbin staff?</u></b><br> Our admin can be found here <a target="_blank" href="https://t.me/hologramic" class="contact-link">@hologramic</a> &amp; (Any other accounts claiming to be Admins are fake)<br><br>
+                <b><u>Can I advertise my product/brand on Rarbin?</u></b><br> Yes, contact us for advertisement pricing.</p></details>
+            <p></p>
+            <details><summary><h6 style="margin: 20px 0 0 0;padding:0;font-weight:bold;">Backup domains:</h6></summary>
+            <p style="margin: 0;padding-left:10px;">
+                In case of domain suspension you can connect to Rarbin using the following Domains.<br>
+                Be sure to check our official <a target="_blank" href="https://t.me/rarbin_news" class="contact-link">Telegram</a> if this is to occur.<br>
+                
+                - <a href="https://rarbin.com" target="_blank" class="contact-link">rarbin.com</a><br>
+                - <a href="https://rarbin.net" target="_blank" class="contact-link">rarbin.net</a><br>
+                - <a href="https://rarbin.org" target="_blank" class="contact-link">rarbin.org</a><br>
+            </p></details>
+            <details><summary><h6 style="margin: 20px 0 0 0;padding:0;font-weight:bold;">Contact:</h6></summary>
+            <p style="margin: 0;padding-left:10px;">
+                Telegram (fastest replies): <a target="_blank" href="https://t.me/hologramic" class="contact-link">@hologramic</a> &amp;
+                
+                Email (Law enforcement <u>ONLY</u>): <a href="mailto:legal@rarbin.com" class="contact-link">legal@rarbin.com</a> (Emails not from lawyers, police or government will be ignored)<br>
+                If you believe there is an emergency involving danger
+ of death or serious physical injury, please have the subject prefixed 
+as "EMERGENCY REQUEST" and, within good faith belief, we will hide the 
+paste temporarily until further notice.
+                <br><br>
+            </p></details>
+            <br>
+        </div>
+    </div>
+
+</body></html>
+{% endblock %}

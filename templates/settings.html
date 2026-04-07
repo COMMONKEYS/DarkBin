@@ -1,0 +1,798 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Settings | Rarbin</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/legacy/index.css">
+    <link rel="stylesheet" href="/static/files/dropdown.css">
+    <link rel="stylesheet" href="/static/files/bootstrap.min.js">
+    <link rel="stylesheet" href="/static/files/doxbin.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <link rel="canonical" href="https://rarbin.com/settings"/>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form[action="/settings"]');
+            const fileInputs = document.querySelectorAll('input[type="file"]');
+            const removeButtons = document.querySelectorAll('button[onclick^="setRemove"]');
+            const updateButton = document.querySelector('button[name="action"][value="update"]');
+            
+            function initializeFileOperations() {
+                fileInputs.forEach(input => {
+                    input.style.opacity = '1';
+                    input.disabled = false;
+                });
+                
+                removeButtons.forEach(button => {
+                    button.style.opacity = '1';
+                    button.disabled = false;
+                });
+            }
+            
+            initializeFileOperations();
+            
+            form.addEventListener('submit', function(e) {
+                let recaptchaResponse = '';
+                try {
+                    if (typeof grecaptcha !== 'undefined' && grecaptcha.getResponse) {
+                        recaptchaResponse = grecaptcha.getResponse();
+                    }
+                } catch (err) {
+                    recaptchaResponse = '';
+                }
+                if (!recaptchaResponse) {
+                    e.preventDefault();
+                    alert('Please complete the reCAPTCHA before submitting.');
+                    const recaptchaEl = document.querySelector('.g-recaptcha');
+                    if (recaptchaEl && recaptchaEl.scrollIntoView) {
+                        recaptchaEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    return false;
+                }
+                
+                const usernameInput = document.getElementById('username');
+                if (usernameInput && usernameInput.value.length < 2) {
+                    e.preventDefault();
+                    usernameInput.focus();
+                    return false;
+                }
+            });
+        });
+        
+        function setRemoveAvatar() {
+            document.getElementById('remove_avatar').value = 'true';
+            document.querySelector('input[name="avatar_upload"]').value = '';
+            const avatarImg = document.querySelector('.avatar-preview img');
+            if (avatarImg) {
+                avatarImg.src = "{{ url_for('static', filename='files/default.jpg') }}";
+            }
+        }
+        
+        function setRemoveBanner() {
+            document.getElementById('remove_banner').value = 'true';
+            document.querySelector('input[name="banner"]').value = '';
+        }
+        
+        function setRemoveMusic() {
+            document.getElementById('remove_music').value = 'true';
+            document.querySelector('input[name="music"]').value = '';
+        }
+        
+        function selectUsernameColor(color, el) {
+            const palette = document.querySelector('.color-grid');
+            const hasAccess = palette ? (palette.getAttribute('data-has-access') === 'true') : true;
+            if (!hasAccess) {
+                document.getElementById('color-access-popup').style.display = 'flex';
+                return;
+            }
+            document.getElementById('username_color').value = color;
+            document.querySelectorAll('.color-option').forEach(box => {
+                box.style.border = '1px solid #555';
+                box.style.transform = 'scale(1)';
+            });
+            if (el) {
+                el.style.border = '2px solid #fff';
+                el.style.transform = 'scale(1.1)';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentColor = document.getElementById('username_color').value;
+            if (currentColor) {
+                document.querySelectorAll('.color-option').forEach(box => {
+                    if (box.getAttribute('data-color') === currentColor) {
+                        box.style.border = '2px solid #fff';
+                        box.style.transform = 'scale(1.1)';
+                    } else {
+                        box.style.border = '1px solid #555';
+                        box.style.transform = 'scale(1)';
+                    }
+                });
+            }
+        });
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #060606;
+            color: #fff;
+            min-height: 100vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            font-size: 18px;
+        }
+
+        .settings-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .settings-content {
+            background: transparent;
+            border: 2px solid #222;
+            padding: 25px;
+            padding-bottom: 130px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        #status-message {
+            font-size: 16px;
+            padding: 8px 16px;
+            border-radius: 0;
+            text-align: center;
+            margin-bottom: 20px;
+            background: transparent;
+            display: none;
+        }
+
+        #status-message.success {
+            color: #33ff33;
+            border: 1px solid #33ff33;
+        }
+
+        #status-message.error {
+            color: #ff3333;
+            border: 1px solid #ff3333;
+        }
+
+        #status-message a {
+            color: inherit;
+            text-decoration: underline;
+        }
+
+        .settings-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .settings-row {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 22px;
+            align-items: flex-start;
+        }
+
+        .settings-label {
+            color: #fff;
+            font-size: 1.2rem;
+            padding-top: 10px;
+            font-weight: bold;
+        }
+
+        .input-container {
+            max-width: 640px;
+            width: 100%;
+            position: relative;
+        }
+
+        .input-container.inline-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .input-container.inline-actions .settings-input {
+            flex: 1 1 360px;
+        }
+
+        .settings-input {
+            width: 100%;
+            background: #111;
+            border: none;
+            color: #fff;
+            padding: 16px;
+            border-radius: 0;
+            font-size: 1.2rem;
+            box-sizing: border-box;
+        }
+
+        .settings-input:focus {
+            outline: none;
+        }
+
+        #username-input {
+            padding-right: 35px;
+        }
+        #username {
+            padding-right: 35px;
+        }
+
+        .settings-button {
+            background: transparent;
+            color: #fff;
+            border: 1px solid #333;
+            padding: 10px 18px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            border-radius: 0;
+        }
+
+        .settings-button.danger {
+            border-color: #ff3333;
+            color: #ff3333;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 28px);
+            gap: 6px;
+            max-width: 640px;
+        }
+
+        .color-option {
+            width: 28px;
+            height: 28px;
+            border: 2px solid #222;
+            cursor: pointer;
+            box-sizing: border-box;
+            border-radius: 0;
+        }
+
+        .color-option.none {
+            background: transparent;
+        }
+
+        .color-option.selected {
+            border: 2px solid #fff;
+        }
+
+        .avatar-container {
+            max-width: 640px;
+        }
+
+        .avatar-preview {
+            width: 128px;
+            height: 128px;
+            object-fit: cover;
+            border-radius: 0;
+            margin-bottom: 12px;
+        }
+
+        .banner-container {
+            max-width: 900px;
+            margin-bottom: 0;
+        }
+
+        .banner-preview {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 0;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        #remove-banner-btn {
+            width: auto;
+            margin-top: 0;
+        }
+
+        #remove-avatar-btn {
+            width: 120px;
+            margin-top: 0;
+            display: inline-block;
+        }
+
+        .fixed-update-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #060606;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid #222;
+            z-index: 1000;
+        }
+
+        .update-button {
+            background: #1a1a1a;
+            color: #fff;
+            border: 1px solid #333;
+            padding: 12px 34px;
+            cursor: pointer;
+            font-size: 1.25rem;
+            min-width: 170px;
+            border-radius: 0;
+        }
+
+        .username-status {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 17px;
+            color: #666;
+            display: none;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .username-status.show {
+            display: inline;
+        }
+
+        .username-status.available {
+            color: #33ff33;
+        }
+
+        .username-status.taken {
+            color: #ff3333;
+        }
+
+        .avatar-upload {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .avatar-upload.row {
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        #avatar-input {
+            display: none;
+        }
+
+        .two-fa-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            width: 9px;
+            height: 9px;
+            border-radius: 0;
+            background: #ff3333;
+            margin-right: 10px;
+            display: none;
+        }
+
+        .status-indicator.enabled {
+            background: #33ff33;
+            display: inline-block;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #111;
+            padding: 22px;
+            border: 1px solid #333;
+            border-radius: 0;
+            width: 90%;
+            max-width: 420px;
+        }
+
+        #totpModal .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #111;
+            padding: 22px;
+            border: 1px solid #333;
+            border-radius: 0;
+            width: 90%;
+            max-width: 420px;
+        }
+
+        #disableTotpModal .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #111;
+            padding: 22px;
+            border: 1px solid #333;
+            border-radius: 0;
+            width: 90%;
+            max-width: 420px;
+        }
+
+        #statusModal .modal-content {
+            max-width: 400px;
+            padding: 20px;
+            border: none;
+            border-radius: 0;
+            background-color: #111;
+        }
+
+        #statusModal #statusMessage {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #statusModal .button-container {
+            text-align: center;
+        }
+
+        #statusModal .settings-button {
+            min-width: 80px;
+        }
+
+        #totpModal .modal-title {
+            margin: 0 0 20px 0;
+            padding: 0;
+            color: #fff;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .qr-container {
+            text-align: center;
+            margin: 16px 0;
+            background: #fff;
+            padding: 16px;
+            border-radius: 0;
+        }
+
+        .qr-container img {
+            max-width: 220px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .secret-container {
+            padding: 12px;
+            margin: 16px 0;
+            word-break: break-all;
+            font-family: monospace;
+            background: #060606;
+            border: 1px solid #222;
+            border-radius: 0;
+            font-size: 17px;
+        }
+
+        #totpCode,
+        #disableTotpCode {
+            width: 100%;
+            background: #060606;
+            border: 1px solid #222;
+            color: #fff;
+            padding: 16px;
+            margin: 16px 0;
+            border-radius: 0;
+            font-size: 17px;
+            box-sizing: border-box;
+        }
+
+        #totpStep1 p {
+            color: #666;
+            margin: 16px 0;
+            font-size: 17px;
+        }
+
+        #disableTotpModal .modal-title {
+            margin: 0 0 20px 0;
+            padding: 0;
+            color: #fff;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        #disableTotpModal p {
+            color: #666;
+            margin: 16px 0;
+            font-size: 17px;
+        }
+
+        .modal-close {
+            position: absolute;
+            right: 15px;
+            top: 12px;
+            color: #666;
+            font-size: 26px;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        @media screen and (max-width: 768px) {
+            .settings-container {
+                padding: 10px;
+            }
+
+            .settings-content {
+                border: none;
+                padding: 15px;
+                padding-bottom: 70px;
+                gap: 20px;
+            }
+
+            .settings-row {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+
+            .settings-label {
+                padding-top: 0;
+            }
+
+            .input-container,
+            .avatar-container {
+                max-width: none;
+            }
+
+            .color-grid {
+                grid-template-columns: repeat(auto-fill, 28px);
+                max-width: none;
+                gap: 10px;
+            }
+
+            .fixed-update-container {
+                padding: 8px;
+            }
+
+            .update-button {
+                width: 100%;
+                max-width: 220px;
+            }
+
+            .modal-content {
+                margin: 50vh auto 0;
+                transform: translateY(-50%);
+                width: calc(100% - 40px);
+                padding: 16px;
+            }
+
+            #statusModal .modal-content {
+                margin: 50vh auto 0;
+                transform: translateY(-50%);
+                width: calc(100% - 40px);
+            }
+
+            .qr-container {
+                padding: 10px;
+            }
+
+            .qr-container img {
+                max-width: 200px;
+            }
+
+            #totpModal .modal-content,
+            #disableTotpModal .modal-content,
+            #statusModal .modal-content {
+                width: calc(100% - 40px) !important;
+                padding: 15px !important;
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                margin: 0 !important;
+            }
+        }
+
+        .color-access-popup { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 3000; align-items: center; justify-content: center; }
+        .color-access-popup .popup-content { background: #181818; color: #fff; border-radius: 0; padding: 24px; min-width: 320px; text-align: center; box-shadow: 0 2px 16px #000a; }
+        .color-access-popup .popup-content a { color: #ff2222; text-decoration: underline; }
+        .color-access-popup .popup-content button { margin-top: 12px; padding: 8px 24px; background: #181818; color: #fff; border: 1px solid #444; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="settings-container">
+        <div id="status-message"></div>
+        <form action="/settings" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="remove_avatar" id="remove_avatar" value="false">
+            <input type="hidden" name="remove_banner" id="remove_banner" value="false">
+            <input type="hidden" name="remove_music" id="remove_music" value="false">
+            <input type="hidden" name="username_color" id="username_color" value="{{ user.username_color or '' }}">
+            
+            <div class="settings-content">
+                <div class="settings-section">
+                    <div class="settings-row">
+                        <div class="settings-label">Banner</div>
+                        <div class="banner-container">
+                            <div class="input-container inline-actions">
+                                <input type="file" id="banner" name="banner" class="settings-input" accept="image/*">
+                    {% if user.banner %}
+                                    <button type="button" id="remove-banner-btn" class="settings-button danger" onclick="setRemoveBanner()">Remove banner</button>
+                    {% endif %}
+                </div>
+            </div>
+                    </div>
+
+                    {% if user.status in ['root', 'admin', 'manager', 'mod', 'council', 'helper', 'clique', 'rich'] %}
+                    <div class="settings-row">
+                        <div class="settings-label">Music</div>
+                        <div class="input-container inline-actions">
+                            <input type="file" id="music" name="music" class="settings-input" accept=".mp3,.wav,.ogg,.m4a" {% if user.status not in ['root', 'admin', 'manager', 'mod', 'council', 'helper', 'clique', 'rich'] %}disabled{% endif %}>
+                    {% if user.music and user.status in ['root', 'admin', 'manager', 'mod', 'council', 'helper', 'clique', 'rich'] %}
+                                <button type="button" class="settings-button danger" onclick="setRemoveMusic()">Remove music</button>
+                    {% endif %}
+                </div>
+            </div>
+                    {% endif %}
+
+                    <div class="settings-row">
+                        <div class="settings-label">Avatar</div>
+                        <div class="avatar-container">
+                            <div class="input-container inline-actions">
+                                <input type="file" id="avatar_upload" name="avatar_upload" class="settings-input" accept="image/*">
+                                <button type="button" id="remove-avatar-btn" class="settings-button danger" onclick="setRemoveAvatar()">Remove avatar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-row">
+                        <label class="settings-label" for="username">Username</label>
+                        <div class="input-container">
+                            <input type="text" id="username" name="username" class="settings-input" value="{{ user.username }}" minlength="2" maxlength="16" pattern="[A-Za-z0-9]+" title="Only letters and numbers are allowed" {% if get_username_change_limit(user.status) == 0 %}disabled{% endif %} autocomplete="off">
+                            <span id="username-status" class="username-status"></span>
+                        </div>
+                    </div>
+
+                    <div class="settings-row">
+                        <label class="settings-label" for="bio">Bio</label>
+                        <div class="input-container">
+                            <input type="text" id="bio" name="bio" class="settings-input" value="{{ user.bio }}" maxlength="70" autocomplete="off">
+                </div>
+            </div>
+
+                    <div class="settings-row">
+                        <div class="settings-label">Username Color</div>
+                        <div class="input-container" style="max-width: none;">
+                            <div class="color-grid" data-has-access="{{ 'true' if user.username_color_access == 1 else 'false' }}">
+                                <div class="color-option" data-color="#FFD700" style="background-color:#FFD700" onclick="selectUsernameColor('#FFD700', this)"></div>
+                                <div class="color-option" data-color="#BB71E4" style="background-color:#BB71E4" onclick="selectUsernameColor('#BB71E4', this)"></div>
+                                <div class="color-option" data-color="#4B2E83" style="background-color:#4B2E83" onclick="selectUsernameColor('#4B2E83', this)"></div>
+                                <div class="color-option" data-color="#FEC8D8" style="background-color:#FEC8D8" onclick="selectUsernameColor('#FEC8D8', this)"></div>
+                                <div class="color-option" data-color="#BB1E64" style="background-color:#BB1E64" onclick="selectUsernameColor('#BB1E64', this)"></div>
+                                <div class="color-option" data-color="#FFFFFF" style="background-color:#FFFFFF" onclick="selectUsernameColor('#FFFFFF', this)"></div>
+                                <div class="color-option" data-color="#365DDA" style="background-color:#365DDA" onclick="selectUsernameColor('#365DDA', this)"></div>
+                                <div class="color-option" data-color="#F96D31" style="background-color:#F96D31" onclick="selectUsernameColor('#F96D31', this)"></div>
+                                <div class="color-option" data-color="#FFFE71" style="background-color:#FFFE71" onclick="selectUsernameColor('#FFFE71', this)"></div>
+                                <div class="color-option" data-color="#B83C26" style="background-color:#B83C26" onclick="selectUsernameColor('#B83C26', this)"></div>
+                                <div class="color-option" data-color="#C5C6D3" style="background-color:#C5C6D3" onclick="selectUsernameColor('#C5C6D3', this)"></div>
+                                <div class="color-option" data-color="#94FAAC" style="background-color:#94FAAC" onclick="selectUsernameColor('#94FAAC', this)"></div>
+                                <div class="color-option" data-color="#964B00" style="background-color:#964B00" onclick="selectUsernameColor('#964B00', this)"></div>
+                                <div class="color-option" data-color="#000080" style="background-color:#000080" onclick="selectUsernameColor('#000080', this)"></div>
+                                <div class="color-option" data-color="#FF69B4" style="background-color:#FF69B4" onclick="selectUsernameColor('#FF69B4', this)"></div>
+                                <div class="color-option" data-color="#FFD580" style="background-color:#FFD580" onclick="selectUsernameColor('#FFD580', this)"></div>
+                                <div class="color-option" data-color="#601EF9" style="background-color:#601EF9" onclick="selectUsernameColor('#601EF9', this)"></div>
+                                <div class="color-option" data-color="#30D5C8" style="background-color:#30D5C8" onclick="selectUsernameColor('#30D5C8', this)"></div>
+                                <div class="color-option" data-color="#9999FF" style="background-color:#9999FF" onclick="selectUsernameColor('#9999FF', this)"></div>
+                                <div class="color-option" data-color="#4C4CFF" style="background-color:#4C4CFF" onclick="selectUsernameColor('#4C4CFF', this)"></div>
+                            </div>
+                </div>
+            </div>
+
+                    <div class="settings-row">
+                        <label class="settings-label" for="email">Email</label>
+                        <div class="input-container">
+                            <input type="email" id="email" name="email" class="settings-input" value="{{ user.email or '' }}" autocomplete="off">
+                </div>
+            </div>
+
+                    <div class="settings-row">
+                        <label class="settings-label" for="current_password">Current Password</label>
+                        <div class="input-container">
+                            <input type="password" id="current_password" name="current_password" class="settings-input" placeholder="Current Password" autocomplete="off">
+                </div>
+            </div>
+
+                    <div class="settings-row">
+                        <label class="settings-label" for="new_password">New Password</label>
+                        <div class="input-container">
+                            <input type="password" id="new_password" name="new_password" class="settings-input" placeholder="New Password" autocomplete="off">
+                </div>
+            </div>
+
+                    <div class="settings-row">
+                        <div class="settings-label">Two-Factor Auth</div>
+                        <div class="two-fa-status">
+                            <span class="status-indicator {% if user.otp_enabled %}enabled{% endif %}"></span>
+                            {% if user.otp_enabled %}
+                                <button type="submit" class="settings-button danger" formaction="/disable-2fa" formmethod="post">Disable 2FA</button>
+                            {% else %}
+                                <button type="button" class="settings-button" onclick="document.getElementById('totpModal').style.display='block'">Enable 2FA</button>
+                            {% endif %}
+                </div>
+            </div>
+
+                    <div class="settings-row">
+                        <div class="input-container" style="grid-column: 1 / -1;">
+                            <div class="g-recaptcha" data-theme="dark" data-sitekey="6LfkGncrAAAAACAFCgbfJzEZQt8XIr69KTXWSIVp"></div>
+                </div>
+            </div>
+                </div>
+            </div>
+            
+            <div class="fixed-update-container">
+                <button type="submit" name="action" value="update" class="update-button">Update Profile</button>
+            </div>
+        </form>
+
+        <div id="color-access-popup" class="color-access-popup">
+          <div class="popup-content">
+            <div style="color: #ff2222; font-size: 18px; margin-bottom: 12px;">Purchase at <a href='{{ request.host_url }}upgrades' target='_blank'>{{ request.host }}/upgrades</a></div>
+            <button type="button" onclick="document.getElementById('color-access-popup').style.display='none'">OK</button>
+          </div>
+        </div>
+
+        {% if not user.otp_enabled %}
+        <div id="totpModal" class="modal">
+            <div class="modal-content">
+                <span class="modal-close" onclick="document.getElementById('totpModal').style.display='none'">×</span>
+                <div class="modal-title">Enable Two-Factor Authentication</div>
+                {% if qr_code_image %}
+                <div id="totpStep1">
+                    <p>Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.).</p>
+                    <div class="qr-container">
+                        <img src="data:image/png;base64,{{ qr_code_image }}" alt="2FA QR Code">
+                    </div>
+                    <form action="/enable-2fa" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="text" id="totpCode" name="token" placeholder="6-digit code" required pattern="\d{6}" title="Enter a 6-digit code" autocomplete="off">
+                        <div class="button-row" style="text-align:center">
+                            <button type="submit" class="settings-button">Verify & Enable</button>
+                        </div>
+                </form>
+                </div>
+            {% else %}
+                <div id="totpStep1">
+                    <p>Click continue to generate your QR code.</p>
+                    <div class="button-row" style="text-align:center">
+                        <a href="/settings" class="settings-button">Continue</a>
+        </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
+{% endblock %}

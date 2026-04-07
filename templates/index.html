@@ -1,0 +1,276 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Home | Rarbin</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/legacy/index.css">
+    <link rel="stylesheet" href="/static/files/dropdown.css">
+    <link rel="stylesheet" href="/static/files/bootstrap.min.js">
+    <link rel="stylesheet" href="/static/files/doxbin.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="canonical" href="https://rarbin.com"/>
+</head>
+    <style>
+    body, p {
+        background-color: #060606;
+        color: white;
+        font-family: Arial, sans-serif;
+    }
+
+    tr.special-role-row-black td, tr.special-role-row-black th {
+        background-color: #080808;
+        color: #fff;
+    }
+    tr.special-role-row-grey td, tr.special-role-row-grey th {
+        background-color: #181818;
+        color: #fff;
+    }
+
+    tr.status-root    > td, tr.status-root    > th { background-color: #171105 !important; }
+    tr.status-admin   > td, tr.status-admin   > th { background-color: #3D0606 !important; }
+    tr.status-manager > td, tr.status-manager > th { background-color: #1A0D2B !important; }
+    tr.status-mod     > td, tr.status-mod     > th { background-color: #0F2D06 !important; }
+    tr.status-council > td, tr.status-council > th { background-color: #1A3D5D !important; }
+    tr.status-helper  > td, tr.status-helper  > th { background-color: #0A0A33 !important; }
+    tr.status-clique  > td, tr.status-clique  > th { background-color: #031C34 !important; }
+    tr.status-rich    > td, tr.status-rich    > th { background-color: #2B200D !important; }
+    tr.status-criminal> td, tr.status-criminal> th { background-color: #2B021B !important; }
+    tr.status-vip     > td, tr.status-vip     > th { background-color: #2D0A21 !important; }
+    tr.status-user    > td, tr.status-user    > th { background-color: #181818 !important; }
+
+    .table-pin tbody>tr:nth-child(2n+1)>td,
+    .table-pin tbody>tr:nth-child(2n+1)>th {
+        background-color: #080808;
+    }
+
+    .table-pin tbody>tr:nth-child(2n)>td,
+    .table-pin tbody>tr:nth-child(2n)>th {
+        background-color: #181818;
+    }
+
+    .table td[colspan] {
+        text-align: left;
+        padding-left: 15px;
+    }
+
+    .table .comments-col { width: 10%; text-align: center; }
+    .table .views-col { width: 10%; text-align: center; }
+    .table .created-by-col { width: 15%; text-align: center; }
+    .table .added-col { width: 15%; text-align: center; }
+
+    .created-by-col a, .created-by-col a:hover {
+        text-decoration: none !important;
+    }
+    </style>
+
+<body>
+
+    <div class="col-md-12">
+        <div class="col-md-12" style="margin-top: 15px;float:none;">
+            <div align="center">
+                    <img src="{{ url_for('static', filename='files/logo.png') }}" alt="Logo">
+                <h5 class="announcement a-1" style="color:#2AABEE;"><u><a style="color:inherit;" href="https://t.me/Rarbin_news">Rarbin News Telegram</a></u></h5>
+                <h5 class="announcement a-1" style="color:#2AABEE;"><u><a style="color:inherit;" href="https://t.me/+N9bmeRgxuXFkMDlk">Official Telegram Chat</a></u></h5>
+                <h5 class="announcement a-2" style="color:#CC0000;">Mirrors: rarbin.org | rarbin.net</a></h5>
+            </div>
+        </div>
+
+        <div class="col-md-7" style="float:none;margin:auto;padding:0;">
+            <h6 style="margin-top: 14px;">Pinned Pastes</h6>
+            <table class="table table-pin table-hover{% if is_special_role %} special-role-table{% endif %}">
+                <thead{% if is_special_role %} class="special-role-table"{% endif %}>
+                    <tr style="background-color: #181818;">
+                        <th colspan="3">Title</th>
+                        <th class="clickable auto-size comments-col" id="commentsorder">Comments</th>
+                        <th class="clickable r-hide views-col" id="dateorder">Views</th>
+                        <th class="clickable auto-size created-by-col" id="commentsorder">Created by</th>
+                        <th class="clickable auto-size added-col" id="viewsorder">Added</th>
+                    </tr>
+                </thead>
+                <tbody{% if is_special_role %} class="special-role-table"{% endif %}>
+                    {% for pinned_post in pinned_posts_list %}
+                    <tr class="doxentry{% if pinned_post.pastownerstatus not in ['user', 'anonymous'] %} status-{{ pinned_post.pastownerstatus|lower }}{% endif %} special-role-row-{% if loop.index0 % 2 == 0 %}grey{% else %}black{% endif %}">
+                        <td colspan="3" style="overflow: hidden;text-overflow: ellipsis;">
+                            <a title="{{ pinned_post.name }}" href="{{ url_for('post', file=pinned_post.url_name) }}">
+                                {{ pinned_post.name }}
+                            </a>
+                        </td>
+                        <td class="r-hide comments-col">
+                            {% if pinned_post.comments_disabled %}
+                                —
+                            {% else %}
+                                {{ pinned_post.comments|length }}
+                            {% endif %}
+                        </td>
+                        <td class="r-hide views-col">{{ pinned_post.view }}</td>
+                        <td class="created-by-col">
+                            {% if pinned_post.pastownerstatus == 'root' %}
+                                {% set custom_color = get_username_color(pinned_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=pinned_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#FFAB02' }}; font-weight: bold;">
+                                    <span>{{ pinned_post.pastowner }}</span> <span style="color: #FFAB02;">[Founder]</span>
+                                </a>
+                            {% elif pinned_post.pastownerstatus == 'admin' %}
+                                {% set custom_color = get_username_color(pinned_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=pinned_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#ff0000' }}; font-weight: bold; background-image: url('{{ url_for('static', filename='files/red.gif') }}');">
+                                    <span>{{ pinned_post.pastowner }}</span> <span style="color: #ff0000;">[Admin]</span>
+                                </a>
+                            {% elif pinned_post.pastownerstatus == 'manager' %}
+                                {% set custom_color = get_username_color(pinned_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=pinned_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#BB71E4' }}; font-weight: bold; background-image: url('{{ url_for('static', filename='files/purple.gif') }}');">
+                                    <span>{{ pinned_post.pastowner }}</span> <span style="color: #BB71E4;">[Manager]</span>
+                                </a>
+                            {% elif pinned_post.pastownerstatus == 'mod' %}
+                                {% set custom_color = get_username_color(pinned_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=pinned_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#39FF14' }}; font-weight: bold;">
+                                    <span>{{ pinned_post.pastowner }}</span> <span style="color: #39FF14;">[Mod]</span>
+                                </a>   
+                            {% elif pinned_post.pastownerstatus == 'council' %}
+                                {% set custom_color = get_username_color(pinned_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=pinned_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#87cefa' }}; font-weight: bold;">
+                                    <span>{{ pinned_post.pastowner }}</span> <span style="color: #87cefa;">[Council]</span>
+                                </a>
+                            {% elif pinned_post.pastownerstatus == 'helper' %}
+                                {% set custom_color = get_username_color(pinned_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=pinned_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#5555FF' }}; font-weight: bold;">
+                                    <span>{{ pinned_post.pastowner }}</span> <span style="color: #5555FF;">[Helper]</span>
+                                </a>
+                            {% elif pinned_post.pastownerstatus == 'clique' %}
+                                {% set custom_color = get_username_color(pinned_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=pinned_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#095699' }}; font-weight: bold;">
+                                    <span>{{ pinned_post.pastowner }}</span> <span style="color: #095699;">[Clique]</span>
+                                </a>
+                            {% elif pinned_post.pastownerstatus == 'rich' %}
+                                {% set custom_color = get_username_color(pinned_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=pinned_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#FFD700' }}; font-weight: bold; background-image: url('{{ url_for('static', filename='files/gold.gif') }}');">
+                                    <span>{{ pinned_post.pastowner }}</span> <span style="color: #FFD700;">[Rich]</span>
+                                </a>
+                            {% elif pinned_post.pastownerstatus == 'criminal' %}
+                                {% set custom_color = get_username_color(pinned_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=pinned_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#780A48' }}; font-weight: bold;">
+                                    <span>{{ pinned_post.pastowner }}</span> <span style="color: #780A48;">[Criminal]</span>
+                                </a>
+                            {% elif pinned_post.pastownerstatus == 'vip' %}
+                                {% set custom_color = get_username_color(pinned_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=pinned_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#9B318E' }}; font-weight: bold;">
+                                    <span>{{ pinned_post.pastowner }}</span> <span style="color: #9B318E;">[VIP]</span>
+                                </a>
+                            {% elif pinned_post.pastownerstatus == 'user' %}
+                                {% set custom_color = get_username_color(pinned_post.pastowner) %}
+                                <a href="{{ url_for('user', username=pinned_post.pastowner) }}" style="color: {{ custom_color or '#2a9fd6' }};">{{ pinned_post.pastowner }}</a>
+                            {% endif %}
+                        </td>
+                        <td class="added-col">{{ (pinned_post.date ~ ' ' ~ pinned_post.hour) | naturaltime }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        
+            <table class="table table-striped table-hover" style="margin-top: 0px;">
+                <thead{% if is_special_role %} class="special-role-table"{% endif %}>
+                    <tr style="background-color: #181818;">
+                        <th colspan="3">Title</th>
+                        <th class="clickable auto-size comments-col" id="commentsorder">Comments</th>
+                        <th class="clickable r-hide views-col" id="dateorder">Views</th>
+                        <th class="clickable auto-size created-by-col" id="commentsorder">Created by</th>
+                        <th class="clickable auto-size added-col" id="viewsorder">Added</th>
+                    </tr>
+                </thead>
+                <tbody{% if is_special_role %} class="special-role-table"{% endif %}>
+                    {% for anon_post in anon_posts_list %}
+                    <tr class="doxentry{% if anon_post.pastownerstatus not in ['user', 'anonymous'] %} status-{{ anon_post.pastownerstatus|lower }}{% endif %} special-role-row-{% if loop.index0 % 2 == 0 %}grey{% else %}black{% endif %}">
+                        <td colspan="3" style="overflow: hidden;text-overflow: ellipsis;">
+                            <a title="{{ anon_post.name }}" href="{{ url_for('post', file=anon_post.url_name) }}">
+                                {% if anon_post.pin == 'True' %}<img src="{{ url_for('static', filename='files/pin.svg') }}" alt="Pinned" style="margin-right: 8px; width: 16px; height: 16px; vertical-align: middle; filter: invert(1);">{% endif %}{{ anon_post.name }}
+                            </a>
+                        </td>
+                        <td class="r-hide comments-col">
+                            {% if anon_post.comments_disabled %}
+                                —
+                            {% else %}
+                                {{ anon_post.comments|length }}
+                            {% endif %}
+                        </td>
+                        <td class="r-hide views-col">{{ anon_post.view }}</td>
+                        <td class="created-by-col">
+                            {% if anon_post.pastownerstatus == 'root' %}
+                                {% set custom_color = get_username_color(anon_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=anon_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#FFAB02' }}; font-weight: bold;">
+                                    <span>{{ anon_post.pastowner }}</span> <span style="color: #FFAB02;">[Founder]</span>
+                                </a>
+                            {% elif anon_post.pastownerstatus == 'admin' %}
+                                {% set custom_color = get_username_color(anon_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=anon_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#ff0000' }}; font-weight: bold; background-image: url('{{ url_for('static', filename='files/red.gif') }}');">
+                                    <span>{{ anon_post.pastowner }}</span> <span style="color: #ff0000;">[Admin]</span>
+                                </a>
+                            {% elif anon_post.pastownerstatus == 'manager' %}
+                                {% set custom_color = get_username_color(anon_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=anon_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#BB71E4' }}; font-weight: bold; background-image: url('{{ url_for('static', filename='files/purple.gif') }}');">
+                                    <span>{{ anon_post.pastowner }}</span> <span style="color: #BB71E4;">[Manager]</span>
+                                </a>
+                            {% elif anon_post.pastownerstatus == 'mod' %}
+                                {% set custom_color = get_username_color(anon_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=anon_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#39FF14' }}; font-weight: bold;">
+                                    <span>{{ anon_post.pastowner }}</span> <span style="color: #39FF14;">[Mod]</span>
+                                </a>
+                            {% elif anon_post.pastownerstatus == 'council' %}
+                                {% set custom_color = get_username_color(anon_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=anon_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#87cefa' }}; font-weight: bold;">
+                                    <span>{{ anon_post.pastowner }}</span> <span style="color: #87cefa;">[Council]</span>
+                                </a>
+                            {% elif anon_post.pastownerstatus == 'helper' %}
+                                {% set custom_color = get_username_color(anon_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=anon_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#5555FF' }}; font-weight: bold;">
+                                    <span>{{ anon_post.pastowner }}</span> <span style="color: #5555FF;">[Helper]</span>
+                                </a>
+                            {% elif anon_post.pastownerstatus == 'rich' %}
+                                {% set custom_color = get_username_color(anon_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=anon_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#FFD700' }}; font-weight: bold; background-image: url('{{ url_for('static', filename='files/gold.gif') }}');">
+                                    <span>{{ anon_post.pastowner }}</span> <span style="color: #FFD700;">[Rich]</span>
+                                </a>
+                            {% elif anon_post.pastownerstatus == 'criminal' %}
+                                {% set custom_color = get_username_color(anon_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=anon_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#780A48' }}; font-weight: bold;">
+                                    <span>{{ anon_post.pastowner }}</span> <span style="color: #780A48;">[Criminal]</span>
+                                </a>
+                            {% elif anon_post.pastownerstatus == 'vip' %}
+                                {% set custom_color = get_username_color(anon_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=anon_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#9B318E' }}; font-weight: bold;">
+                                    <span>{{ anon_post.pastowner }}</span> <span style="color: #9B318E;">[VIP]</span>
+                                </a>
+                            {% elif anon_post.pastownerstatus == 'clique' %}
+                                {% set custom_color = get_username_color(anon_post.pastowner) %}
+                                <a class="dox-username" href="{{ url_for('user', username=anon_post.pastowner) }}" target="_self" style="color: {{ custom_color or '#095699' }}; font-weight: bold;">
+                                    <span>{{ anon_post.pastowner }}</span> <span style="color: #095699;">[Clique]</span>
+                                </a>
+                            {% elif anon_post.pastownerstatus == 'user' %}
+                                {% set custom_color = get_username_color(anon_post.pastowner) %}
+                                <a style="color: {{ custom_color or '#2a9fd6' }};" href="{{ url_for('user', username=anon_post.pastowner) }}">{{ anon_post.pastowner }}</a>
+                            {% elif anon_post.pastownerstatus == 'anonymous' %}
+                                {{ anon_post.pastowner }}
+                            {% endif %}
+                        </td>                        
+                        <td class="added-col">{{ (anon_post.date ~ ' ' ~ anon_post.hour) | naturaltime }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>                 
+    </div>
+
+    <div class="clickable text-center auto-size">
+        <br>
+            <a href="#">Back to top</a>
+        </br>
+    </div>
+
+</body>
+
+</html>
+{% endblock %}

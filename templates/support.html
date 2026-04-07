@@ -1,0 +1,78 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/static/legacy/index.css">
+        <link rel="stylesheet" href="/static/files/dropdown.css">
+        <script src="/static/files/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="/static/files/doxbin.css">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="canonical" href="https://rarbin.com/support"/>
+        <title>Support | Rarbin</title>
+    </head>
+    <style>
+        .admin-text {
+            color: red;
+            font-weight: bold;
+        }
+        p.faq b{
+           margin-left: -3px;
+        }
+
+        details summary { 
+        cursor: pointer;
+        }
+        @keyframes  details-show {
+        from {
+            opacity:0;
+            transform: var(--details-translate, translateY(1em));
+        }
+        }
+        details[open] > *:not(summary) {
+        animation: details-show 500ms ease-in-out;
+        }
+
+        .contact-link {
+            color: red;
+            font-weight: bold;
+            text-decoration: none;
+        }
+    
+        .contact-link:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+{% endblock %}
+
+{% block bottom %}
+    <div class="container">
+        <div style="margin-top: 70px">
+            <details open=""><summary><h6 style="margin: 20px 0 0 0;font-weight:bold;">Platform Resources:</h6></summary>
+            <p style="margin-left:10px;">
+                - <a href="/tos" class="contact-link">Terms Of Service</a><br>
+                - <a href="https://t.me/rarbin_news" class="contact-link">Telegram Channel</a>
+                <br></p>
+            </details>
+            <details open=""><summary><h6 style="margin: 20px 0 0 0;font-weight:bold;">Removal Request Guidelines:</h6></summary>
+            <p style="margin-left:10px;">
+                Rarbin will review content removal requests that claim a violation of our Terms of Service ("TOS").<br>
+                For non-law enforcement agency requests, please contact us via Telegram at <a href="https://t.me/hologramic" class="contact-link">@hologramic</a>.<br></p>
+            <p></p></details>
+            <details open=""><summary><h6 style="margin: 20px 0 0 0;font-weight:bold;">Law Enforcement Request Guidelines:</h6></summary>
+            <p style="margin-left:10px;">
+                Rarbin will respond to all law enforcement requests from authorized officials. These Law Enforcement Request Guidelines outline how authorized law enforcement officials can engage with and contact us to request information or content removal in accordance with applicable laws and policies. To facilitate processing, we require that all requests be addressed directly to Rarbin. Please include proper Mutual Legal Assistance Treaty documents if cross-border law enforcement is involved.<br>
+                <br>
+                Rarbin does not retain any subscriber information that is not directly provided to us, such as IP addresses. We will only cooperate with data requests if accompanied by a valid court order, and will actively fight any attempt to subpoena or otherwise acquire any user information. We will voluntarily cooperate with law enforcement requests from all jurisdictions for content removal requests when the content violates our TOS. All law enforcement requests should be submitted via email to <a href="mailto:legal@rarbin.com" class="contact-link">legal@rarbin.com</a> for processing.
+                <br>
+            </p></details>
+        </div>
+    </div>
+
+</body></html>
+{% endblock %}
