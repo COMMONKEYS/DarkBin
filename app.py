@@ -5,6 +5,7 @@ import os
 import hashlib
 import secrets
 from datetime import datetime, timedelta
+app.config["DEBUG"] = True
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev")
