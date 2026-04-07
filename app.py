@@ -136,8 +136,6 @@ def add_security_headers(response):
 
 @app.after_request
 def log_requests(response):
-    """Log all requests for monitoring"""
-    check_request_security(request, response.status_code)
     return response
 
 @app.errorhandler(413)
