@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify, render_template, redirect, make_response
-from flask_wtf import CSRFProtect
 import psycopg2
 import psycopg2.extras
 import os
@@ -8,27 +7,25 @@ import secrets
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
+app.secret_key = os.environ.get("SECRET_KEY", "dev")
 
-# ✅ FIX CSRF
-csrf = CSRFProtect(app)
-
-# ✅ DATABASE
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
+
 # -----------------------
-# DATABASE CONNECTION
+# DATABASE
 # -----------------------
 def get_db():
     if not DATABASE_URL:
-        raise Exception("DATABASE_URL is missing")
+        raise Exception("DATABASE_URL not set")
 
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    conn = psycopg2.connect(DATABASE_URL, sslmode="require")
     cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     return conn, cursor
 
+
 # -----------------------
-# INIT DATABASE
+# INIT TABLES
 # -----------------------
 def init_db():
     conn, cursor = get_db()
@@ -71,39 +68,16 @@ def init_db():
     );
     """)
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS follows (
-        id SERIAL PRIMARY KEY,
-        follower_id INTEGER,
-        following_id INTEGER,
-        UNIQUE(follower_id, following_id)
-    );
-    """)
-
     conn.commit()
     conn.close()
 
-# -----------------------
-# JINJA FIX (naturaltime)
-# -----------------------
-@app.template_filter('naturaltime')
-def naturaltime(value):
-    now = datetime.utcnow()
-    diff = now - value
-
-    if diff.days > 0:
-        return f"{diff.days}d ago"
-    elif diff.seconds > 3600:
-        return f"{diff.seconds // 3600}h ago"
-    elif diff.seconds > 60:
-        return f"{diff.seconds // 60}m ago"
-    return "just now"
 
 # -----------------------
 # HELPERS
 # -----------------------
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
+
 
 def create_session(user_id):
     token = secrets.token_hex(32)
@@ -119,12 +93,15 @@ def create_session(user_id):
 
     return token
 
+
 def get_user():
     token = request.cookies.get("session")
+
     if not token:
         return None
 
     conn, cursor = get_db()
+
     cursor.execute(
         "SELECT * FROM sessions WHERE token = %s AND expires > NOW()",
         (token,)
@@ -141,17 +118,15 @@ def get_user():
 
     return user
 
+
 # -----------------------
 # ROUTES (HTML)
 # -----------------------
 @app.route("/")
-def home():
-    conn, cursor = get_db()
-    cursor.execute("SELECT * FROM pasts ORDER BY id DESC LIMIT 20")
-    pasts = cursor.fetchall()
-    conn.close()
+def index():
+    user = get_user()
+    return render_template("index.html", user=user)
 
-    return render_template("index.html", pasts=pasts, user=get_user())
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -170,15 +145,16 @@ def register():
         )
         user_id = cursor.fetchone()["id"]
         conn.commit()
-    except Exception as e:
+    except Exception:
         conn.close()
-        return render_template("register.html", error="Username already taken")
+        return render_template("register.html", error="Username taken")
 
     token = create_session(user_id)
 
-    resp = make_response(redirect("/"))
-    resp.set_cookie("session", token)
-    return resp
+    response = make_response(redirect("/"))
+    response.set_cookie("session", token, httponly=True)
+    return response
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -198,12 +174,20 @@ def login():
 
     token = create_session(user["id"])
 
-    resp = make_response(redirect("/"))
-    resp.set_cookie("session", token)
-    return resp
+    response = make_response(redirect("/"))
+    response.set_cookie("session", token, httponly=True)
+    return response
+
+
+@app.route("/logout")
+def logout():
+    response = make_response(redirect("/"))
+    response.delete_cookie("session")
+    return response
+
 
 # -----------------------
-# PASTE SYSTEM
+# PASTES
 # -----------------------
 @app.route("/create", methods=["POST"])
 def create_paste():
@@ -224,56 +208,33 @@ def create_paste():
 
     return redirect("/")
 
-@app.route("/paste/<int:id>")
-def view_paste(id):
+
+@app.route("/pastes")
+def view_pastes():
     conn, cursor = get_db()
-
-    cursor.execute("SELECT * FROM pasts WHERE id = %s", (id,))
-    paste = cursor.fetchone()
-
-    cursor.execute("SELECT * FROM comments WHERE paste_id = %s", (id,))
-    comments = cursor.fetchall()
-
+    cursor.execute("SELECT * FROM pasts ORDER BY id DESC")
+    pastes = cursor.fetchall()
     conn.close()
 
-    return render_template("paste.html", paste=paste, comments=comments, user=get_user())
+    return render_template("pastes.html", pastes=pastes)
+
 
 # -----------------------
-# COMMENTS
+# API ROUTES (JSON)
 # -----------------------
-@app.route("/comment", methods=["POST"])
-def comment():
-    user = get_user()
-    if not user:
-        return redirect("/login")
-
-    paste_id = request.form.get("paste_id")
-    content = request.form.get("content")
-
+@app.route("/api/pastes")
+def api_pastes():
     conn, cursor = get_db()
-    cursor.execute(
-        "INSERT INTO comments (paste_id, user_id, content) VALUES (%s, %s, %s)",
-        (paste_id, user["id"], content)
-    )
-    conn.commit()
+    cursor.execute("SELECT * FROM pasts ORDER BY id DESC")
+    data = cursor.fetchall()
     conn.close()
 
-    return redirect(f"/paste/{paste_id}")
+    return jsonify(data)
+
 
 # -----------------------
-# ERROR HANDLER (VERY IMPORTANT)
+# START
 # -----------------------
-@app.errorhandler(Exception)
-def handle_error(e):
-    return f"""
-    <h1>ERROR</h1>
-    <pre>{str(e)}</pre>
-    """, 500
-
-# -----------------------
-# STARTUP
-# -----------------------
-init_db()
-
 if __name__ == "__main__":
-    app.run(debug=True)
+    init_db()
+    app.run(host="0.0.0.0", port=8000)
