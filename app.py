@@ -1,5 +1,5 @@
-from flask import Flask, request, jsonify
-import psycopg2 
+from flask import Flask, request, jsonify, render_template, redirect
+import psycopg2
 import psycopg2.extras
 import os
 import hashlib
@@ -120,6 +120,9 @@ def create_session(user_id):
 
 
 def get_user(token):
+    if not token:
+        return None
+
     conn, cursor = get_db()
 
     cursor.execute(
@@ -140,10 +143,69 @@ def get_user(token):
 
 
 # -----------------------
-# AUTH ROUTES
+# ROUTES (HTML)
 # -----------------------
-@app.route("/register", methods=["POST"])
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+
+@app.route("/register", methods=["GET", "POST"])
 def register():
+    if request.method == "GET":
+        return render_template("register.html")
+
+    username = request.form.get("username")
+    password = request.form.get("password")
+
+    conn, cursor = get_db()
+
+    try:
+        cursor.execute(
+            "INSERT INTO users (username, password) VALUES (%s, %s) RETURNING id",
+            (username, hash_password(password))
+        )
+        user_id = cursor.fetchone()["id"]
+        conn.commit()
+    except Exception as e:
+        conn.close()
+        return render_template("register.html", error="Username taken")
+
+    token = create_session(user_id)
+
+    response = redirect("/")
+    response.set_cookie("session", token)
+    return response
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        return render_template("login.html")
+
+    username = request.form.get("username")
+    password = request.form.get("password")
+
+    conn, cursor = get_db()
+    cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+    user = cursor.fetchone()
+    conn.close()
+
+    if not user or user["password"] != hash_password(password):
+        return render_template("login.html", error="Invalid login")
+
+    token = create_session(user["id"])
+
+    response = redirect("/")
+    response.set_cookie("session", token)
+    return response
+
+
+# -----------------------
+# API ROUTES (JSON)
+# -----------------------
+@app.route("/api/register", methods=["POST"])
+def api_register():
     data = request.json
     conn, cursor = get_db()
 
@@ -162,8 +224,8 @@ def register():
     return jsonify({"token": token})
 
 
-@app.route("/login", methods=["POST"])
-def login():
+@app.route("/api/login", methods=["POST"])
+def api_login():
     data = request.json
     conn, cursor = get_db()
 
@@ -179,119 +241,8 @@ def login():
 
 
 # -----------------------
-# PASTES
-# -----------------------
-@app.route("/paste", methods=["POST"])
-def create_paste():
-    token = request.headers.get("Authorization")
-    user = get_user(token)
-
-    if not user:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    data = request.json
-
-    conn, cursor = get_db()
-    cursor.execute(
-        "INSERT INTO pasts (user_id, title, content) VALUES (%s, %s, %s)",
-        (user["id"], data["title"], data["content"])
-    )
-    conn.commit()
-    conn.close()
-
-    return jsonify({"success": True})
-
-
-@app.route("/pastes")
-def get_pastes():
-    conn, cursor = get_db()
-    cursor.execute("SELECT * FROM pasts ORDER BY id DESC")
-    data = cursor.fetchall()
-    conn.close()
-
-    return jsonify(data)
-
-
-# -----------------------
-# COMMENTS
-# -----------------------
-@app.route("/comment", methods=["POST"])
-def comment():
-    token = request.headers.get("Authorization")
-    user = get_user(token)
-
-    if not user:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    data = request.json
-
-    conn, cursor = get_db()
-    cursor.execute(
-        "INSERT INTO comments (paste_id, user_id, content) VALUES (%s, %s, %s)",
-        (data["paste_id"], user["id"], data["content"])
-    )
-    conn.commit()
-    conn.close()
-
-    return jsonify({"success": True})
-
-
-# -----------------------
-# FOLLOW SYSTEM
-# -----------------------
-@app.route("/follow", methods=["POST"])
-def follow():
-    token = request.headers.get("Authorization")
-    user = get_user(token)
-
-    if not user:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    target_id = request.json["user_id"]
-
-    conn, cursor = get_db()
-    try:
-        cursor.execute(
-            "INSERT INTO follows (follower_id, following_id) VALUES (%s, %s)",
-            (user["id"], target_id)
-        )
-        conn.commit()
-    except:
-        pass
-
-    conn.close()
-    return jsonify({"success": True})
-
-
-# -----------------------
-# PROFILE
-# -----------------------
-@app.route("/user/<username>")
-def get_profile(username):
-    conn, cursor = get_db()
-
-    cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-    user = cursor.fetchone()
-
-    if not user:
-        conn.close()
-        return jsonify({"error": "Not found"}), 404
-
-    cursor.execute("SELECT * FROM pasts WHERE user_id = %s", (user["id"],))
-    pasts = cursor.fetchall()
-
-    conn.close()
-
-    return jsonify({
-        "user": user,
-        "pastes": pasts
-    })
-
-
-# -----------------------
 # START
 # -----------------------
-init_db()
-
 if __name__ == "__main__":
+    init_db()
     app.run(debug=True)
